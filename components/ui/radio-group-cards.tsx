@@ -5,7 +5,7 @@ import { CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useId } from "react";
 
-interface RadioGroupCardsProps extends React.HTMLAttributes<HTMLDivElement> {
+interface RadioGroupCardsProps {
   value: string;
   onChange: (value: string) => void;
   items: {
@@ -13,6 +13,7 @@ interface RadioGroupCardsProps extends React.HTMLAttributes<HTMLDivElement> {
     label: string;
   }[];
   orientation?: "horizontal" | "vertical";
+  className?: string;
 }
 
 export function RadioGroupCards({

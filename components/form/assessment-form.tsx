@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -12,19 +12,29 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroupCards } from "@/components/ui/radio-group-cards";
+import { MultiSelect } from "../ui/multi-select";
 
 const formSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
+  name: z.string().min(2, "Please enter your full name"),
   prompt: z.string().min(3, "Please enter your interview prompt"),
   assessmentType: z.nativeEnum(AssessmentType),
   submissionType: z.nativeEnum(SubmissionType),
+  coachToReview: z.array(z.string()).optional(),
   notes: z.string().optional(),
 });
 
+interface Coach {
+  id: string;
+  Name: string;
+  Record_ID: string;
+}
+
 export default function AssessmentForm() {
   const router = useRouter();
-  const { setFormData } = useRecording();
-
+  const { formData: formValues, setFormData } = useRecording();
+  const [coaches, setCoaches] = React.useState<Coach[]>([]);
+  console.log(formValues);
   const {
     register,
     handleSubmit,
@@ -35,20 +45,74 @@ export default function AssessmentForm() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       assessmentType: AssessmentType.BEHAVIORAL,
-      submissionType: SubmissionType.LOOM,
+      submissionType: SubmissionType.MASTERCLASS,
+      coachToReview: [],
     },
   });
 
+
+  useEffect(() => {
+    retrieveCoach();
+  }, []);
+
+  useEffect(() => {
+    if (formValues) {
+      if (formValues.email) setValue("email", formValues.email);
+      if (formValues.name) setValue("name", formValues.name);
+      if (formValues.prompt) setValue("prompt", formValues.prompt);
+      if (formValues.assessmentType) setValue("assessmentType", formValues.assessmentType);
+      if (formValues.submissionType) setValue("submissionType", formValues.submissionType);
+      if (formValues.coachToReview) setValue("coachToReview", formValues.coachToReview);
+      if (formValues.notes) setValue("notes", formValues.notes);
+    }
+  }, [formValues, setValue]);
+
+
   const assessmentType = watch("assessmentType");
   const submissionType = watch("submissionType");
+  const coachToReview = watch("coachToReview");
 
-  const onSubmit = (data: z.infer<typeof formSchema>) => {
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    console.log("Form submitted with data:", data);
+
+    // Set the form data in context
     setFormData(data);
-    router.push("/record");
+
+    // Small delay to ensure context is updated before navigation
+    setTimeout(() => {
+      router.push(`/record`);
+    }, 50);
+  };
+
+  const retrieveCoach = async () => {
+    try {
+      const webhookurl = process.env.NEXT_PUBLIC_MAKE_WEBHOOK_COACH_GET_URL;
+      if (!webhookurl) {
+        console.error("Make.com webhook URL not configured");
+        return;
+      }
+      const response = await fetch(webhookurl);
+      const data = await response.json();
+      console.log("Coaches:", data);
+      setCoaches(data);
+    } catch (error) {
+      console.error("Error fetching coaches:", error);
+    }
+  };
+
+  const addCoach = () => {
+    const currentCoaches = coachToReview || [];
+    setValue("coachToReview", [...currentCoaches, ""]);
+  };
+
+  const removeCoach = (index: number) => {
+    const currentCoaches = coachToReview || [];
+    const newCoaches = currentCoaches.filter((_, i) => i !== index);
+    setValue("coachToReview", newCoaches);
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto p-6 md:p-8">
+    <div className="w-full max-w-3xl mx-auto p-2 md:p-8">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
         <div className="space-y-3">
           <Label htmlFor="email" className="text-base">
@@ -67,10 +131,26 @@ export default function AssessmentForm() {
         </div>
 
         <div className="space-y-3">
+          <Label htmlFor="name" className="text-base">
+            Full Name <span className="text-destructive">*</span>
+          </Label>
+          <Input
+            id="name"
+            type="text"
+            {...register("name")}
+            placeholder="Your full name"
+            className="w-full"
+          />
+          {errors.name && (
+            <p className="text-destructive text-sm mt-1">{errors.name.message}</p>
+          )}
+        </div>
+
+        <div className="space-y-3">
           <Label htmlFor="prompt" className="text-base">
             Interview Prompt: What is your submission responding to? <span className="text-destructive">*</span>
           </Label>
-          <p className="text-muted-foreground text-sm">eg "Tell me about yourself" or "Design Uber for people 65 and older"</p>
+          <p className="text-muted-foreground text-sm">eg &quot;Tell me about yourself&quot; or &quot;Design Uber for people 65 and older&quot;</p>
           <Textarea
             id="prompt"
             {...register("prompt")}
@@ -111,8 +191,8 @@ export default function AssessmentForm() {
             value={submissionType}
             onChange={(value) => setValue("submissionType", value as SubmissionType)}
             items={[
-              { value: SubmissionType.LOOM, label: "Loom Baseline Assessment" },
               { value: SubmissionType.MASTERCLASS, label: "Masterclass Assignment" },
+              { value: SubmissionType.LOOM, label: "Loom Baseline Assessment" },
               { value: SubmissionType.REVIEW, label: "Review" },
               { value: SubmissionType.WRITEUP, label: "Write up Assignment" },
               { value: SubmissionType.COMPANY, label: "Company Assignment" },
@@ -121,6 +201,29 @@ export default function AssessmentForm() {
           {errors.submissionType && (
             <p className="text-destructive text-sm">{errors.submissionType.message}</p>
           )}
+        </div>
+
+        <div className="space-y-3">
+          <Label className="text-base">
+            Coach/Masterclass Host
+          </Label>
+          <p className="text-muted-foreground text-sm">
+            Add the name of the Coach who hosted the session, otherwise default to Serges
+          </p>
+
+          <MultiSelect
+            options={coaches.map(coach => ({
+              label: coach.Name,
+              value: coach.Record_ID,
+            }))}
+            onValueChange={(value) => setValue("coachToReview", value)}
+            value={coachToReview}
+            placeholder="Select a coach"
+            variant="inverted"
+            animation={2}
+            className="min-h-[44px]"
+            maxCount={4}
+          />
         </div>
 
         <div className="space-y-3">
@@ -137,8 +240,8 @@ export default function AssessmentForm() {
         </div>
 
         <div className="pt-4 flex justify-end">
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             size="lg"
             disabled={isSubmitting}
             className="px-8 transition-all duration-300"

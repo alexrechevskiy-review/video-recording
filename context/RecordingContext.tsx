@@ -1,7 +1,8 @@
 "use client";
 
-import React, { createContext, useContext, useState } from 'react';
-import { FormData, RecordedData } from '@/lib/types';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { AssessmentType, FormData, RecordedData, SubmissionType } from '@/lib/types';
+import { useSearchParams } from 'next/navigation';
 
 type RecordingContextType = {
   formData: FormData | null;
@@ -9,41 +10,65 @@ type RecordingContextType = {
   setFormData: (data: FormData) => void;
   setRecordedData: (data: RecordedData) => void;
   resetData: () => void;
+  clearRecordedData: () => void;
 };
 
-const initialFormData: FormData | null = null;
-const initialRecordedData: RecordedData | null = null;
-
-const RecordingContext = createContext<RecordingContextType>({
-  formData: initialFormData,
-  recordedData: initialRecordedData,
-  setFormData: () => {},
-  setRecordedData: () => {},
-  resetData: () => {},
+const RecordingContext = createContext<RecordingContextType & { resetFormExceptEmail: () => void }>({
+  formData: null,
+  recordedData: null,
+  setFormData: () => { },
+  setRecordedData: () => { },
+  resetData: () => { },
+  clearRecordedData: () => { },
+  resetFormExceptEmail: () => { },
 });
 
-export function RecordingProvider({ children }: { children: React.ReactNode }) {
-  const [formData, setFormData] = useState<FormData | null>(initialFormData);
-  const [recordedData, setRecordedData] = useState<RecordedData | null>(initialRecordedData);
+export const RecordingProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const query = useSearchParams();
+  const [formData, setFormData] = useState<FormData | null>(null);
+  const [recordedData, setRecordedData] = useState<RecordedData | null>(null);
+  const email = query.get("email");
+
+  useEffect(() => {
+    if (email) {
+      setFormData({ email: email || "", name: "", prompt: "", assessmentType: AssessmentType.BEHAVIORAL, submissionType: SubmissionType.MASTERCLASS });
+    }
+  }, [email]);
 
   const resetData = () => {
     setFormData(null);
     setRecordedData(null);
   };
 
+  const clearRecordedData = () => {
+    setRecordedData(null);
+  };
+
+  const resetFormExceptEmail = () => {
+    setFormData((prev) => {
+      if (!prev || !prev.email) return { email: "", name: "", prompt: "", assessmentType: AssessmentType.BEHAVIORAL, submissionType: SubmissionType.MASTERCLASS };
+      return { email: prev.email, name: "", prompt: "", assessmentType: AssessmentType.BEHAVIORAL, submissionType: SubmissionType.MASTERCLASS };
+    });
+    setRecordedData(null);
+  };
+
+  const value = {
+    formData,
+    setFormData,
+    recordedData,
+    setRecordedData,
+    clearRecordedData,
+    resetData,
+    resetFormExceptEmail,
+  };
+
   return (
-    <RecordingContext.Provider
-      value={{
-        formData,
-        recordedData,
-        setFormData,
-        setRecordedData,
-        resetData,
-      }}
-    >
+    <RecordingContext.Provider value={value}>
       {children}
     </RecordingContext.Provider>
   );
-}
+};
 
 export const useRecording = () => useContext(RecordingContext);

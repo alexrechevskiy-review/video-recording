@@ -2,40 +2,56 @@
 
 import React, { useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { isMobileDevice } from "@/lib/recording-utils";
 
 interface VideoPreviewProps {
   stream: MediaStream | null;
   className?: string;
   muted?: boolean;
+  maxHeight?: string;
 }
 
 export default function VideoPreview({
   stream,
   className,
   muted = true,
-}: VideoPreviewProps) {
-  const videoRef = useRef<HTMLVideoElement>(null);
+  videoRef,
+  maxHeight,
+}: VideoPreviewProps & { videoRef?: React.RefObject<HTMLVideoElement> }) {
+  const internalRef = useRef<HTMLVideoElement>(null);
+  const ref = videoRef || internalRef;
+  const isMobile = isMobileDevice();
 
   useEffect(() => {
-    if (videoRef.current && stream) {
-      videoRef.current.srcObject = stream;
-    }
+    if (ref.current && stream) {
+      ref.current.srcObject = stream;
 
+      ref.current.onloadedmetadata = () => {
+        console.log("Video metadata loaded");
+      };
+      ref.current.oncanplay = () => {
+        console.log("Video can play");
+      };
+      ref.current.onerror = (e) => {
+        console.error("Video error:", e);
+      };
+    }
     return () => {
-      if (videoRef.current) {
-        videoRef.current.srcObject = null;
+      if (ref.current) {
+        ref.current.srcObject = null;
       }
     };
-  }, [stream]);
+  }, [stream, ref]);
 
   if (!stream) {
     return (
-      <div 
+      <div
         className={cn(
           "flex items-center justify-center bg-muted rounded-lg",
-          "w-full h-full min-h-[300px]",
+          "w-full h-full min-h-[576px]",
           className
         )}
+        style={maxHeight ? { maxHeight } : undefined}
       >
         <p className="text-muted-foreground">No preview available</p>
       </div>
@@ -44,14 +60,15 @@ export default function VideoPreview({
 
   return (
     <video
-      ref={videoRef}
+      ref={ref}
       autoPlay
       playsInline
       muted={muted}
       className={cn(
-        "w-full h-full object-cover rounded-lg bg-black",
+        "bg-black",
         className
       )}
+      style={maxHeight ? { maxHeight } : undefined}
     />
   );
 }

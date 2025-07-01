@@ -45,14 +45,14 @@ export default function CountdownTimer({
         <div
           className={cn(
             "absolute inset-0 rounded-full",
-            "animate-ping bg-primary/20"
+            "animate-ping-sm bg-white/50"
           )}
         ></div>
         <div
           className={cn(
             "flex items-center justify-center",
-            "h-32 w-32 rounded-full bg-background border-4 border-primary",
-            "text-5xl font-bold"
+            "h-32 w-32 rounded-full bg-transparent border-2 border-white",
+            "text-5xl font-bold text-white"
           )}
         >
           {count}

@@ -1,9 +1,18 @@
-import React from "react";
+'use client'
+import React, { useEffect } from "react";
 import Link from "next/link";
 import { CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useRecording } from "@/context/RecordingContext";
 
 export default function SuccessPage() {
+  const { resetData } = useRecording();
+
+  // Clear all data when entering success page
+  useEffect(() => {
+    resetData();
+  }, [resetData]);
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4 md:p-8">
       <div className="max-w-md text-center">
@@ -12,15 +21,15 @@ export default function SuccessPage() {
             <CheckCircle className="h-12 w-12 text-primary" />
           </div>
         </div>
-        
+
         <h1 className="text-3xl font-bold tracking-tight mb-2">
           Submission Complete!
         </h1>
-        
+
         <p className="mb-8 text-muted-foreground">
           Your video interview has been successfully submitted. Thank you for your submission.
         </p>
-        
+
         <Button asChild size="lg" className="px-8">
           <Link href="/">Return Home</Link>
         </Button>

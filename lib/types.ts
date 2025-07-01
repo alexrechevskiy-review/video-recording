@@ -1,9 +1,11 @@
 export type FormData = {
   email: string;
+  name: string;
   prompt: string;
   assessmentType: AssessmentType;
   submissionType: SubmissionType;
   notes?: string;
+  coachToReview?: string[];
 };
 
 export enum AssessmentType {
@@ -31,4 +33,19 @@ export type RecordingSettings = {
 export type RecordedData = {
   videoBlob?: Blob;
   duration: number;
+};
+
+// Add new types for submission history
+export type SubmissionRecord = {
+  id: string;
+  Email: string;
+  Status: string;
+  'Submission link': string | null;
+  'Coach\'s Feedback': string;
+  createdTime: string;
+};
+
+export type SubmissionHistoryResponse = {
+  submissions: SubmissionRecord[];
+  total: number;
 };

@@ -5,6 +5,7 @@ import { Camera, Mic, Monitor, CameraOff, MicOff, MonitorOff } from "lucide-reac
 import { Button } from "@/components/ui/button";
 import { RecordingSettings } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { isMobileDevice } from "@/lib/recording-utils";
 
 interface MediaControlsProps {
   settings: RecordingSettings;
@@ -19,6 +20,8 @@ export default function MediaControls({
   disabled = false,
   className,
 }: MediaControlsProps) {
+  const isMobile = isMobileDevice();
+
   const toggleCamera = () => {
     onSettingsChange({
       ...settings,
@@ -72,20 +75,22 @@ export default function MediaControls({
         )}
       </Button>
 
-      <Button
-        variant={settings.screenShareEnabled ? "default" : "outline"}
-        size="icon"
-        onClick={toggleScreenShare}
-        disabled={disabled}
-        className="h-12 w-12 rounded-full"
-        aria-label={settings.screenShareEnabled ? "Turn screen share off" : "Turn screen share on"}
-      >
-        {settings.screenShareEnabled ? (
-          <Monitor className="h-5 w-5" />
-        ) : (
-          <MonitorOff className="h-5 w-5" />
-        )}
-      </Button>
+      {!isMobile && (
+        <Button
+          variant={settings.screenShareEnabled ? "default" : "outline"}
+          size="icon"
+          onClick={toggleScreenShare}
+          disabled={disabled}
+          className="h-12 w-12 rounded-full"
+          aria-label={settings.screenShareEnabled ? "Turn screen share off" : "Turn screen share on"}
+        >
+          {settings.screenShareEnabled ? (
+            <Monitor className="h-5 w-5" />
+          ) : (
+            <MonitorOff className="h-5 w-5" />
+          )}
+        </Button>
+      )}
     </div>
   );
 }
