@@ -456,7 +456,7 @@ export default function VideoReview() {
         )}
 
         {/* Submit button - Fixed at bottom */}
-        <div className="flex md:flex-row flex-col justify-end gap-4 p-2 md:p-0 flex-shrink-0">
+        <div className="flex md:flex-row flex-col justify-between gap-4 p-2 md:p-0 flex-shrink-0">
           <Button
             variant="outline"
             size="lg"

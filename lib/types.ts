@@ -19,8 +19,6 @@ export enum AssessmentType {
 export enum SubmissionType {
   LOOM = "Loom Baseline Assessment",
   MASTERCLASS = "Masterclass Assignment",
-  REVIEW = "Review",
-  WRITEUP = "Write up Assignment",
   COMPANY = "Company Assignment"
 }
 

@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroupCards } from "@/components/ui/radio-group-cards";
 import { MultiSelect } from "../ui/multi-select";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "../ui/select";
 
 const formSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -20,7 +21,7 @@ const formSchema = z.object({
   prompt: z.string().min(3, "Please enter your interview prompt"),
   assessmentType: z.nativeEnum(AssessmentType),
   submissionType: z.nativeEnum(SubmissionType),
-  coachToReview: z.array(z.string()).optional(),
+  coachToReview: z.string().min(1, "Please select a coach to review"),
   notes: z.string().optional(),
 });
 
@@ -45,8 +46,8 @@ export default function AssessmentForm() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       assessmentType: AssessmentType.BEHAVIORAL,
-      submissionType: SubmissionType.MASTERCLASS,
-      coachToReview: [],
+      submissionType: SubmissionType.LOOM,
+      coachToReview: 'recLQ0koHrbQLbnXp',
     },
   });
 
@@ -62,7 +63,7 @@ export default function AssessmentForm() {
       if (formValues.prompt) setValue("prompt", formValues.prompt);
       if (formValues.assessmentType) setValue("assessmentType", formValues.assessmentType);
       if (formValues.submissionType) setValue("submissionType", formValues.submissionType);
-      if (formValues.coachToReview) setValue("coachToReview", formValues.coachToReview);
+      if (formValues.coachToReview) setValue("coachToReview", Array.isArray(formValues.coachToReview) ? formValues.coachToReview[0] : formValues.coachToReview);
       if (formValues.notes) setValue("notes", formValues.notes);
     }
   }, [formValues, setValue]);
@@ -76,7 +77,7 @@ export default function AssessmentForm() {
     console.log("Form submitted with data:", data);
 
     // Set the form data in context
-    setFormData(data);
+    setFormData({ ...data, coachToReview: [data.coachToReview] });
 
     // Small delay to ensure context is updated before navigation
     setTimeout(() => {
@@ -100,23 +101,12 @@ export default function AssessmentForm() {
     }
   };
 
-  const addCoach = () => {
-    const currentCoaches = coachToReview || [];
-    setValue("coachToReview", [...currentCoaches, ""]);
-  };
-
-  const removeCoach = (index: number) => {
-    const currentCoaches = coachToReview || [];
-    const newCoaches = currentCoaches.filter((_, i) => i !== index);
-    setValue("coachToReview", newCoaches);
-  };
-
   return (
     <div className="w-full max-w-3xl mx-auto p-2 md:p-8">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
         <div className="space-y-3">
           <Label htmlFor="email" className="text-base">
-            Enrollment Email <span className="text-destructive">*</span>
+            You're logged in with the following account <span className="text-destructive">*</span>
           </Label>
           <Input
             id="email"
@@ -191,10 +181,8 @@ export default function AssessmentForm() {
             value={submissionType}
             onChange={(value) => setValue("submissionType", value as SubmissionType)}
             items={[
-              { value: SubmissionType.MASTERCLASS, label: "Masterclass Assignment" },
               { value: SubmissionType.LOOM, label: "Loom Baseline Assessment" },
-              { value: SubmissionType.REVIEW, label: "Review" },
-              { value: SubmissionType.WRITEUP, label: "Write up Assignment" },
+              { value: SubmissionType.MASTERCLASS, label: "Masterclass Assignment" },
               { value: SubmissionType.COMPANY, label: "Company Assignment" },
             ]}
           />
@@ -205,32 +193,38 @@ export default function AssessmentForm() {
 
         <div className="space-y-3">
           <Label className="text-base">
-            Coach/Masterclass Host
+            Coach/Masterclass Host <span className="text-destructive">*</span>
           </Label>
           <p className="text-muted-foreground text-sm">
             Add the name of the Coach who hosted the session, otherwise default to Serges
           </p>
 
-          <MultiSelect
-            options={coaches.map(coach => ({
-              label: coach.Name,
-              value: coach.Record_ID,
-            }))}
-            onValueChange={(value) => setValue("coachToReview", value)}
+          <Select
             value={coachToReview}
-            placeholder="Select a coach"
-            variant="inverted"
-            animation={2}
-            className="min-h-[44px]"
-            maxCount={4}
-          />
+            onValueChange={(value) => setValue("coachToReview", value)}
+            name="coachToReview"
+          >
+            <SelectTrigger className="min-h-[44px] w-full">
+              <SelectValue placeholder="Select a coach" />
+            </SelectTrigger>
+            <SelectContent>
+              {coaches.map(coach => (
+                <SelectItem key={coach.Record_ID} value={coach.Record_ID}>
+                  {coach.Name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors.coachToReview && (
+            <p className="text-destructive text-sm">{errors.coachToReview.message}</p>
+          )}
         </div>
 
         <div className="space-y-3">
           <Label htmlFor="notes" className="text-base">
             Members Note
           </Label>
-          <p className="text-muted-foreground text-sm">Anything else you want to share about your submission?</p>
+          <p className="text-muted-foreground text-sm">Please add any notes, reference links, or anything else you want to share with your submission.</p>
           <Textarea
             id="notes"
             {...register("notes")}

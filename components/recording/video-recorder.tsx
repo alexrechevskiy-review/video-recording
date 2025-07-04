@@ -709,7 +709,15 @@ export default function VideoRecorder() {
                 className="mb-4"
               />
 
-              <div className="flex gap-4">
+              <div className="flex gap-4 w-full justify-between">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={handleBack}
+                  disabled={isCountingDown}
+                >
+                  Back to Form
+                </Button>
                 {!isRecording ? (
                   <Button
                     size="lg"
@@ -736,14 +744,6 @@ export default function VideoRecorder() {
                   </Button>
                 )}
 
-                <Button
-                  variant="outline"
-                  size="lg"
-                  onClick={handleBack}
-                  disabled={isCountingDown}
-                >
-                  Back to Form
-                </Button>
               </div>
             </div>
           </div>
