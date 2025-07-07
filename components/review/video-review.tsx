@@ -331,7 +331,7 @@ export default function VideoReview() {
       )}>
         {/* Video player with loading overlay - Height constrained on mobile */}
         <div className={cn(
-          "relative bg-black rounded-xl overflow-hidden mb-6 flex-shrink-0",
+          "relative bg-black rounded-xl overflow-hidden mb-6 flex-shrink-0 flex justify-center",
           isMobile ? "w-full" : "flex-1"
         )}
           style={
@@ -383,8 +383,8 @@ export default function VideoReview() {
             playsInline
             className="object-contain"
             style={
-              pcIframeVideoHeight
-                ? { height: '100%', width: 'auto', objectFit: 'contain', opacity: isVideoLoading ? 0.3 : 1 }
+              isInIframe && !isMobile
+              ? { height: '400px' , width: '640px'}
                 : isMobile
                   ? { width: '100%', height: '100%', objectFit: 'contain', opacity: isVideoLoading ? 0.3 : 1 }
                   : { width: '100%', height: '100%', objectFit: 'contain', opacity: isVideoLoading ? 0.3 : 1 }
