@@ -54,10 +54,11 @@ export default function VideoReview() {
       console.log("CSM list:", data);
       if (data && formData?.email) {
         const result = data.filter(
-          (e: { '✍️ Email': string; '🚫 Full Name': string }) => e['✍️ Email'] === formData.email
+          (e: { '✍️ Email': string; '🚫 Full Name': string }) => e['✍️ Email'] == formData.email
         );
         setIsInCsmList(result.length > 0);
-        if(result.lenth > 0) {
+        if(result.length > 0) {
+          console.log(result);
           setCsmName(result[0]['🚫 Full Name'])
         }
       }
