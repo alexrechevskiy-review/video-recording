@@ -33,7 +33,7 @@ export const RecordingProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     if (email) {
-      setFormData({ email: email || "", prompt: "", assessmentType: AssessmentType.BEHAVIORAL, submissionType: SubmissionType.MASTERCLASS });
+      setFormData({ email: email || "", prompt: "", assessmentType: AssessmentType.BEHAVIORAL, submissionType: SubmissionType.LOOM });
     }
   }, [email]);
 
@@ -48,8 +48,8 @@ export const RecordingProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const resetFormExceptEmail = () => {
     setFormData((prev) => {
-      if (!prev || !prev.email) return { email: "", prompt: "", assessmentType: AssessmentType.BEHAVIORAL, submissionType: SubmissionType.MASTERCLASS };
-      return { email: prev.email, prompt: "", assessmentType: AssessmentType.BEHAVIORAL, submissionType: SubmissionType.MASTERCLASS };
+      if (!prev || !prev.email) return { email: "", prompt: "", assessmentType: AssessmentType.BEHAVIORAL, submissionType: SubmissionType.LOOM };
+      return { email: prev.email, prompt: "", assessmentType: AssessmentType.BEHAVIORAL, submissionType: SubmissionType.LOOM };
     });
     setRecordedData(null);
   };
