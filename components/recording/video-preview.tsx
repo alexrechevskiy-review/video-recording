@@ -9,6 +9,7 @@ interface VideoPreviewProps {
   className?: string;
   muted?: boolean;
   maxHeight?: string;
+  style?: React.CSSProperties;
 }
 
 export default function VideoPreview({
@@ -17,6 +18,7 @@ export default function VideoPreview({
   muted = true,
   videoRef,
   maxHeight,
+  style,
 }: VideoPreviewProps & { videoRef?: React.RefObject<HTMLVideoElement> }) {
   const internalRef = useRef<HTMLVideoElement>(null);
   const ref = videoRef || internalRef;
@@ -51,7 +53,7 @@ export default function VideoPreview({
           "w-full h-full min-h-[576px]",
           className
         )}
-        style={maxHeight ? { maxHeight } : undefined}
+        style={style || (maxHeight ? { maxHeight } : undefined)}
       >
         <p className="text-muted-foreground">No preview available</p>
       </div>
@@ -68,7 +70,7 @@ export default function VideoPreview({
         "bg-black",
         className
       )}
-      style={maxHeight ? { maxHeight } : undefined}
+      style={style || (maxHeight ? { maxHeight } : undefined)}
     />
   );
 }

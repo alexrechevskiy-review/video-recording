@@ -71,6 +71,7 @@ export default function VideoRecorder() {
   const combinedStreamRef = useRef<MediaStream | null>(null);
 
   const isMobile = isMobileDevice();
+  const isInIframe = typeof window !== 'undefined' && window.self !== window.top;
   const [mobileVideoHeight, setMobileVideoHeight] = useState<string>('auto');
 
   // Calculate mobile video height on mount and resize
@@ -481,7 +482,12 @@ export default function VideoRecorder() {
           {/* Full height video preview */}
           <VideoPreview
             stream={previewStream}
-            className="absolute inset-0 w-full h-full object-cover"
+            className="absolute inset-0 object-cover"
+            style={
+              isInIframe && !isMobile
+                ? { width: '400px', height: '640px', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }
+                : { width: '100%', height: '100%' }
+            }
             videoRef={previewVideoRef}
           />
 
@@ -688,7 +694,12 @@ export default function VideoRecorder() {
             <div className="relative bg-black rounded-xl overflow-hidden mb-6 flex items-center justify-center flex-1">
               <VideoPreview
                 stream={previewStream}
-                className="w-full h-full object-contain"
+                className="object-contain"
+                style={
+                  isInIframe && !isMobile
+                    ? { width: '400px', height: '640px' }
+                    : { width: '100%', height: '100%' }
+                }
                 videoRef={previewVideoRef}
               />
 
