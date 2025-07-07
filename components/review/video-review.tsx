@@ -41,6 +41,7 @@ export default function VideoReview() {
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   const [isInCsmList, setIsInCsmList] = useState(false);
   const [csmName, setCsmName] = useState('');
+  const isEmbedded = typeof window !== "undefined" && window.self !== window.top;
 
   const retrieveCSM = useCallback(async () => {
     try {
@@ -321,7 +322,13 @@ export default function VideoReview() {
           "relative bg-black rounded-xl overflow-hidden mb-6 flex-shrink-0",
           isMobile ? "w-full" : "flex-1"
         )}
-          style={isMobile ? { height: mobileVideoHeight } : undefined}
+          style={
+            isEmbedded
+              ? { height: "100%" }
+              : isMobile
+                ? { height: mobileVideoHeight }
+                : undefined
+          }
         >
           {isVideoLoading && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 z-10">
