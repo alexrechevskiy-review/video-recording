@@ -97,7 +97,7 @@ export default function VideoReview() {
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
     console.log('isInIframe,', isInIframe, 'isMobile', isMobile);
     if (isInIframe && !isMobile) {
-      setPcIframeVideoHeight('436px');
+      setPcIframeVideoHeight('400px');
     } else {
       setPcIframeVideoHeight(undefined);
     }
