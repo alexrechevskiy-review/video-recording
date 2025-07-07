@@ -381,8 +381,14 @@ export default function VideoReview() {
             controls={!isVideoLoading}
             autoPlay={false}
             playsInline
-            className="w-full h-full object-contain"
-            style={{ opacity: isVideoLoading ? 0.3 : 1 }}
+            className="object-contain"
+            style={
+              pcIframeVideoHeight
+                ? { height: '100%', width: 'auto', objectFit: 'contain', opacity: isVideoLoading ? 0.3 : 1 }
+                : isMobile
+                  ? { width: '100%', height: '100%', objectFit: 'contain', opacity: isVideoLoading ? 0.3 : 1 }
+                  : { width: '100%', height: '100%', objectFit: 'contain', opacity: isVideoLoading ? 0.3 : 1 }
+            }
           />
         </div>
 
