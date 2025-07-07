@@ -490,6 +490,7 @@ export async function uploadRecordingToGoogleDrive(
   videoBlob: Blob,
   assessmentData: any,
   isInCsmList: boolean,
+  csmName: string,
   onProgress?: (progress: { loaded: number; total: number; percentage: number }) => void,
   onError?: (error: string) => void,
   isRetry: boolean = false
@@ -514,7 +515,7 @@ export async function uploadRecordingToGoogleDrive(
       filename,
       assessmentData.email,
       isInCsmList,
-      assessmentData.name,
+      csmName,
       onProgress,
       onError,
       shouldResume ? currentSession : undefined
@@ -547,6 +548,7 @@ export async function uploadRecordingToBothServices(
   videoBlob: Blob,
   assessmentData: any,
   isInCsmList: boolean,
+  csmName: string,
   onProgressUpdate?: (progress: UploadProgress) => void,
   isRetry: boolean = false,
 ): Promise<{ webhookSuccess: boolean; googleDriveFileId?: string; errors: string[] }> {
@@ -576,6 +578,7 @@ export async function uploadRecordingToBothServices(
       videoBlob,
       assessmentData,
       isInCsmList,
+      csmName,
       (progress) => {
         updateProgress({
           googleDrive: {
@@ -670,7 +673,6 @@ export async function submitFormData(formData: any): Promise<void> {
       body: JSON.stringify({
         // Personal Information
         email: formData.email,
-        name: formData.name,
         prompt: formData.prompt,
         assessmentType: formData.assessmentType,
         submissionType: formData.submissionType,
@@ -680,7 +682,6 @@ export async function submitFormData(formData: any): Promise<void> {
         googleDriveLink: formData.googleDriveLink,
         recordingDuration: formData.duration,
         coachToReview: formData.coachToReview,
-
         // Metadata
         submissionTimestamp: formData.submissionTimestamp,
         userAgent: navigator.userAgent,

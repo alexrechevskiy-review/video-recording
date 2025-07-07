@@ -3,8 +3,8 @@ import { google } from 'googleapis';
 
 export async function POST(request: NextRequest) {
     try {
-        const { fileName, mimeType, fileSize, userEmail, isInCsmList, name } = await request.json();
-        console.log(fileName, mimeType, fileSize, userEmail, isInCsmList, name);
+        const { fileName, mimeType, fileSize, userEmail, isInCsmList, csmName } = await request.json();
+        console.log(fileName, mimeType, fileSize, userEmail, isInCsmList, csmName);
         if (!fileName || !mimeType || !fileSize || !userEmail) {
             return NextResponse.json(
                 { error: 'Missing required parameters (fileName, mimeType, fileSize, userEmail)' },
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
             name: fileName,
             parents: [userFolderId],
             mimeType: mimeType,
-            description: name ? `Submitted by: ${name}` : undefined,
+            description: csmName != '' ? `Submitted by: ${csmName}` : undefined,
         };
 
         // Initiate resumable upload session using direct fetch
@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
         let shortcutId: string | undefined;
         let shortcutUserFolderId: string | undefined;
         // Use user's name if provided, otherwise fallback to userEmail
-        const userFolderName = name ? name : userEmail;
+        const userFolderName = isInCsmList ? csmName : userEmail;
         if (isInCsmList ? cmsFolderId : unclassifiedFolderId) {
             shortcutParentFolderId = isInCsmList ? cmsFolderId : unclassifiedFolderId;
             // 1. Check if folder with user's name exists in shortcutParentFolderId

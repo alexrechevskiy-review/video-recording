@@ -17,7 +17,6 @@ import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from ".
 
 const formSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
-  name: z.string().min(2, "Please enter your full name"),
   prompt: z.string().min(3, "Please enter your interview prompt"),
   assessmentType: z.nativeEnum(AssessmentType),
   submissionType: z.nativeEnum(SubmissionType),
@@ -59,7 +58,6 @@ export default function AssessmentForm() {
   useEffect(() => {
     if (formValues) {
       if (formValues.email) setValue("email", formValues.email);
-      if (formValues.name) setValue("name", formValues.name);
       if (formValues.prompt) setValue("prompt", formValues.prompt);
       if (formValues.assessmentType) setValue("assessmentType", formValues.assessmentType);
       if (formValues.submissionType) setValue("submissionType", formValues.submissionType);
@@ -117,22 +115,6 @@ export default function AssessmentForm() {
           />
           {errors.email && (
             <p className="text-destructive text-sm mt-1">{errors.email.message}</p>
-          )}
-        </div>
-
-        <div className="space-y-3">
-          <Label htmlFor="name" className="text-base">
-            Full Name <span className="text-destructive">*</span>
-          </Label>
-          <Input
-            id="name"
-            type="text"
-            {...register("name")}
-            placeholder="Your full name"
-            className="w-full"
-          />
-          {errors.name && (
-            <p className="text-destructive text-sm mt-1">{errors.name.message}</p>
           )}
         </div>
 

@@ -40,6 +40,7 @@ export default function VideoReview() {
   const [isNavigatingToHistory, setIsNavigatingToHistory] = useState(false);
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   const [isInCsmList, setIsInCsmList] = useState(false);
+  const [csmName, setCsmName] = useState('');
 
   const retrieveCSM = useCallback(async () => {
     try {
@@ -56,6 +57,9 @@ export default function VideoReview() {
           (e: { '✍️ Email': string; '🚫 Full Name': string }) => e['✍️ Email'] === formData.email
         );
         setIsInCsmList(result.length > 0);
+        if(result.lenth > 0) {
+          setCsmName(result[0]['🚫 Full Name'])
+        }
       }
     } catch (error) {
       console.error("Error fetching coaches:", error);
@@ -186,6 +190,7 @@ export default function VideoReview() {
         recordedData.videoBlob,
         { ...formData, ...recordedData },
         isInCsmList,
+        csmName,
         setUploadProgress,
         isRetry,
       );
@@ -379,79 +384,102 @@ export default function VideoReview() {
           )}>
             <h3 className="text-sm font-medium mb-4">Submission Progress</h3>
 
-            {/* Google Drive Upload Status */}
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                {getUploadStatusIcon(uploadProgress.googleDrive?.status)}
-                <span className="text-sm">Google Drive Upload</span>
-              </div>
-              <span className="text-xs text-gray-500">
-                {uploadProgress.googleDrive?.status === 'completed' && 'Complete'}
-                {uploadProgress.googleDrive?.status === 'failed' && 'Failed'}
-                {uploadProgress.googleDrive?.status === 'uploading' && `${uploadProgress.googleDrive.progress || 0}%`}
-                {uploadProgress.googleDrive?.status === 'pending' && 'Pending'}
-              </span>
-            </div>
+            {/* Combined Progress Status */}
+            {(() => {
+              // Calculate combined progress and status
+              const gd = uploadProgress.googleDrive;
+              const wh = uploadProgress.webhook;
+              let combinedStatus: 'pending' | 'uploading' | 'completed' | 'failed' = 'pending';
+              let combinedProgress = 0;
+              let statusText = '';
 
-            {/* Progress Bar for Google Drive */}
-            {uploadProgress.googleDrive?.status === 'uploading' && (
-              <div className="mt-2 mb-4">
-                <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div
-                    style={{ width: `${uploadProgress.googleDrive.progress || 0}%` }}
-                    className="h-full bg-primary transition-all"
-                  />
-                </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  Uploading to Google Drive... {uploadProgress.googleDrive.progress || 0}%
-                </p>
-              </div>
-            )}
+              if (gd?.status === 'failed' || wh?.status === 'failed') {
+                combinedStatus = 'failed';
+                statusText = 'Submission Failed';
+              } else if (gd?.status === 'uploading') {
+                combinedStatus = 'uploading';
+                // Google Drive uploading: 0-50%
+                combinedProgress = gd.progress ? gd.progress * 0.5 : 0;
+                statusText = `Uploading to Google Drive... ${gd.progress || 0}%`;
+              } else if (gd?.status === 'completed' && wh?.status === 'uploading') {
+                combinedStatus = 'uploading';
+                // Form submitting: 50-100%
+                combinedProgress = 50;
+                statusText = 'Submitting form...';
+              } else if (gd?.status === 'completed' && wh?.status === 'completed') {
+                combinedStatus = 'completed';
+                combinedProgress = 100;
+                statusText = 'Submission Complete';
+              } else if (gd?.status === 'completed') {
+                combinedStatus = 'uploading';
+                combinedProgress = 50;
+                statusText = 'Preparing form submission...';
+              } else {
+                combinedStatus = 'pending';
+                combinedProgress = 0;
+                statusText = 'Waiting to start...';
+              }
 
-            {/* Form Submission Status */}
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                {getUploadStatusIcon(uploadProgress.webhook?.status)}
-                <span className="text-sm">Form Submission</span>
-              </div>
-              <span className="text-xs text-gray-500">
-                {uploadProgress.webhook?.status === 'completed' && 'Complete'}
-                {uploadProgress.webhook?.status === 'failed' && 'Failed'}
-                {uploadProgress.webhook?.status === 'uploading' && 'Submitting...'}
-                {uploadProgress.webhook?.status === 'pending' && 'Pending'}
-              </span>
-            </div>
+              // Show icon based on combined status
+              const icon = getUploadStatusIcon(combinedStatus);
 
-            {/* Current Error Messages */}
-            {(uploadProgress.googleDrive?.error || uploadProgress.webhook?.error) && (
-              <div className="mt-2 text-xs text-orange-600">
-                {uploadProgress.googleDrive?.error && <div>Google Drive: {uploadProgress.googleDrive.error}</div>}
-                {uploadProgress.webhook?.error && <div>Form: {uploadProgress.webhook.error}</div>}
-              </div>
-            )}
-
-            {/* Retry Button */}
-            {showRetryButton && !isSubmitting && (
-              <div className="mt-4 pt-3 border-t border-gray-200">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-gray-600">
-                    {uploadProgress.googleDrive?.canResume
-                      ? `Upload failed. Can resume from ${uploadProgress.googleDrive.progress || 0}%`
-                      : 'Submission failed'
-                    }
+              return (
+                <>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      {icon}
+                      <span className="text-sm">Overall Submission</span>
+                    </div>
+                    <span className="text-xs text-gray-500">
+                      {statusText}
+                    </span>
                   </div>
-                  <Button
-                    onClick={handleRetry}
-                    variant="outline"
-                    size="sm"
-                    className="flex items-center gap-2"
-                  >
-                    <RefreshCw className="h-4 w-4" />
-                    {uploadProgress.googleDrive?.canResume ? 'Resume Submission' : 'Retry Submission'}
-                  </Button>
-                </div>
-              </div>
-            )}
+                  {/* Progress Bar */}
+                  {(combinedStatus === 'uploading' || combinedStatus === 'pending') && (
+                    <div className="mt-2 mb-4">
+                      <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div
+                          style={{ width: `${combinedProgress}%` }}
+                          className="h-full bg-primary transition-all"
+                        />
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {statusText}
+                      </p>
+                    </div>
+                  )}
+                  {/* Error Messages */}
+                  {(gd?.error || wh?.error) && (
+                    <div className="mt-2 text-xs text-orange-600">
+                      {gd?.error && <div>Google Drive: {gd.error}</div>}
+                      {wh?.error && <div>Form: {wh.error}</div>}
+                    </div>
+                  )}
+                  {/* Retry Button */}
+                  {showRetryButton && !isSubmitting && (
+                    <div className="mt-4 pt-3 border-t border-gray-200">
+                      <div className="flex items-center justify-between">
+                        <div className="text-sm text-gray-600">
+                          {gd?.canResume
+                            ? `Upload failed. Can resume from ${gd.progress || 0}%`
+                            : 'Submission failed'
+                          }
+                        </div>
+                        <Button
+                          onClick={handleRetry}
+                          variant="outline"
+                          size="sm"
+                          className="flex items-center gap-2"
+                        >
+                          <RefreshCw className="h-4 w-4" />
+                          {gd?.canResume ? 'Resume Submission' : 'Retry Submission'}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </div>
         )}
 

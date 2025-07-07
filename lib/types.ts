@@ -1,6 +1,5 @@
 export type FormData = {
   email: string;
-  name: string;
   prompt: string;
   assessmentType: AssessmentType;
   submissionType: SubmissionType;

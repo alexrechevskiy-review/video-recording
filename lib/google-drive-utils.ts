@@ -38,7 +38,7 @@ export class GoogleDriveUploader {
         filename: string,
         userEmail: string,
         isInCsmList: boolean,
-        name: string,
+        csmName: string,
         onProgress?: (progress: UploadProgress) => void,
         onError?: (error: string) => void,
         resumeSession?: UploadSession
@@ -63,7 +63,7 @@ export class GoogleDriveUploader {
                         videoBlob.size,
                         userEmail,
                         isInCsmList,
-                        name
+                        csmName
                     );
 
                     this.currentSession = {
@@ -86,7 +86,7 @@ export class GoogleDriveUploader {
                     videoBlob.size,
                     userEmail,
                     isInCsmList,
-                    name
+                    csmName
                 );
 
                 this.currentSession = {
@@ -181,7 +181,7 @@ export class GoogleDriveUploader {
         fileSize: number,
         userEmail: string,
         isInCsmList: boolean,
-        name: string
+        csmName: string
     ): Promise<{ sessionUri: string; uploadId: string }> {
         const response = await fetch('/api/google-drive/initiate', {
             method: 'POST',
@@ -194,7 +194,7 @@ export class GoogleDriveUploader {
                 fileSize: fileSize,
                 userEmail: userEmail,
                 isInCsmList: isInCsmList,
-                name: name
+                csmName: csmName
             }),
         });
 
