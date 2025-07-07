@@ -95,6 +95,7 @@ export default function VideoReview() {
   useEffect(() => {
     const isInIframe = typeof window !== 'undefined' && window.self !== window.top;
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+    console.log('isInIframe,', isInIframe, 'isMobile', isMobile);
     if (isInIframe && !isMobile) {
       setPcIframeVideoHeight('436px');
     } else {
