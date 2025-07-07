@@ -39,7 +39,7 @@ export default function VideoReview() {
   const [mobileVideoHeight, setMobileVideoHeight] = useState<string>('auto');
   const [pcIframeVideoHeight, setPcIframeVideoHeight] = useState<string | undefined>(undefined);
   const [isNavigatingToHistory, setIsNavigatingToHistory] = useState(false);
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
   const [isInCsmList, setIsInCsmList] = useState(false);
   const [csmName, setCsmName] = useState('');
 
@@ -94,7 +94,7 @@ export default function VideoReview() {
   // Set PC iframe video height if embedded via iframe and on PC
   useEffect(() => {
     const isInIframe = typeof window !== 'undefined' && window.self !== window.top;
-    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
     if (isInIframe && !isMobile) {
       setPcIframeVideoHeight('436px');
     } else {
