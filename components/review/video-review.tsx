@@ -39,9 +39,10 @@ export default function VideoReview() {
   const [mobileVideoHeight, setMobileVideoHeight] = useState<string>('auto');
   const [pcIframeVideoHeight, setPcIframeVideoHeight] = useState<string | undefined>(undefined);
   const [isNavigatingToHistory, setIsNavigatingToHistory] = useState(false);
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
   const [isInCsmList, setIsInCsmList] = useState(false);
   const [csmName, setCsmName] = useState('');
+  const isInIframe = typeof window !== 'undefined' && window.self !== window.top;
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
 
   const retrieveCSM = useCallback(async () => {
     try {
@@ -93,8 +94,7 @@ export default function VideoReview() {
 
   // Set PC iframe video height if embedded via iframe and on PC
   useEffect(() => {
-    const isInIframe = typeof window !== 'undefined' && window.self !== window.top;
-    const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+
     console.log('isInIframe,', isInIframe, 'isMobile', isMobile);
     if (isInIframe && !isMobile) {
       setPcIframeVideoHeight('400px');
@@ -335,8 +335,8 @@ export default function VideoReview() {
           isMobile ? "w-full" : "flex-1"
         )}
           style={
-            pcIframeVideoHeight
-              ? { height: pcIframeVideoHeight }
+            isInIframe && !isMobile
+              ? { height: '400px' }
               : isMobile
                 ? { height: mobileVideoHeight }
                 : undefined
