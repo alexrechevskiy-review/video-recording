@@ -697,7 +697,7 @@ export default function VideoRecorder() {
                 className="object-contain"
                 style={
                   isInIframe && !isMobile
-                    ? { width: '400px', height: '640px' }
+                    ? { width: '640px', height: '400px' }
                     : { width: '100%', height: '100%' }
                 }
                 videoRef={previewVideoRef}
