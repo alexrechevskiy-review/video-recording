@@ -37,11 +37,11 @@ export default function VideoReview() {
   const [isVideoLoading, setIsVideoLoading] = useState(true);
   const [videoLoadError, setVideoLoadError] = useState<string | null>(null);
   const [mobileVideoHeight, setMobileVideoHeight] = useState<string>('auto');
+  const [pcIframeVideoHeight, setPcIframeVideoHeight] = useState<string | undefined>(undefined);
   const [isNavigatingToHistory, setIsNavigatingToHistory] = useState(false);
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   const [isInCsmList, setIsInCsmList] = useState(false);
   const [csmName, setCsmName] = useState('');
-  const isEmbedded = typeof window !== "undefined" && window.self !== window.top;
 
   const retrieveCSM = useCallback(async () => {
     try {
@@ -90,6 +90,17 @@ export default function VideoReview() {
       window.removeEventListener('orientationchange', updateHeight);
     };
   }, [isMobile]);
+
+  // Set PC iframe video height if embedded via iframe and on PC
+  useEffect(() => {
+    const isInIframe = typeof window !== 'undefined' && window.self !== window.top;
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    if (isInIframe && !isMobile) {
+      setPcIframeVideoHeight('436px');
+    } else {
+      setPcIframeVideoHeight(undefined);
+    }
+  }, []);
 
   // If no form data or recorded data, redirect back (but not if we're navigating to history)
   useEffect(() => {
@@ -323,8 +334,8 @@ export default function VideoReview() {
           isMobile ? "w-full" : "flex-1"
         )}
           style={
-            isEmbedded
-              ? { height: "100%" }
+            pcIframeVideoHeight
+              ? { height: pcIframeVideoHeight }
               : isMobile
                 ? { height: mobileVideoHeight }
                 : undefined
