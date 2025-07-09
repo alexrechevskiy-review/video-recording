@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
             name: fileName,
             parents: [userFolderId],
             mimeType: mimeType,
-            description: csmName != '' ? `Submitted by: ${csmName}` : undefined,
+            description: csmName !== '' ? `Submitted by: ${csmName}` : undefined,
         };
 
         // Initiate resumable upload session using direct fetch

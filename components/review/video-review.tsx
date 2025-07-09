@@ -41,6 +41,7 @@ export default function VideoReview() {
   const [isNavigatingToHistory, setIsNavigatingToHistory] = useState(false);
   const [isInCsmList, setIsInCsmList] = useState(false);
   const [csmName, setCsmName] = useState('');
+  const [isGettingCsmList, setIsGettingCsmList] = useState(false);
   const isInIframe = typeof window !== 'undefined' && window.self !== window.top;
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
 
@@ -51,6 +52,7 @@ export default function VideoReview() {
         console.error("Make.com webhook URL not configured");
         return;
       }
+      setIsGettingCsmList(true)
       const response = await fetch(webhookurl);
       const data = await response.json();
       console.log("CSM list:", data);
@@ -66,6 +68,8 @@ export default function VideoReview() {
       }
     } catch (error) {
       console.error("Error fetching coaches:", error);
+    } finally {
+      setIsGettingCsmList(false)
     }
   }, [formData?.email]);
 
@@ -329,6 +333,13 @@ export default function VideoReview() {
         "flex-1 flex flex-col container m-auto py-6 overflow-hidden",
         isMobile ? "px-4 max-w-full" : "max-w-5xl"
       )}>
+        {/* CSM Loading Indicator */}
+        {isGettingCsmList && (
+          <div className="flex items-center justify-center mb-4">
+            <Loader2 className="h-5 w-5 animate-spin mr-2" />
+            <span>Loading your CRM information...</span>
+          </div>
+        )}
         {/* Video player with loading overlay - Height constrained on mobile */}
         <div className={cn(
           "relative bg-black rounded-xl overflow-hidden mb-6 flex-shrink-0 flex justify-center",
@@ -515,7 +526,7 @@ export default function VideoReview() {
             variant="outline"
             size="lg"
             onClick={handleBack}
-            disabled={isSubmitting}
+            disabled={isSubmitting || isGettingCsmList}
           >
             Back to Recording
           </Button>
@@ -525,7 +536,7 @@ export default function VideoReview() {
               <Button
                 size="lg"
                 onClick={handleSubmit}
-                disabled={isSubmitting || isVideoLoading || Boolean(videoLoadError)}
+                disabled={isSubmitting || isVideoLoading || Boolean(videoLoadError) || isGettingCsmList}
                 className="px-8"
               >
                 {isSubmitting ? (
@@ -544,7 +555,7 @@ export default function VideoReview() {
               <Button
                 size="lg"
                 onClick={handleRetry}
-                disabled={isSubmitting}
+                disabled={isSubmitting || isGettingCsmList}
                 className="px-8"
                 variant="default"
               >

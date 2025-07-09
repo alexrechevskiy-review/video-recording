@@ -85,6 +85,7 @@ export default function HistoryPage() {
         <Button
           onClick={handleBack}
           variant="outline"
+          className="md:block hidden"
         >
           Record another video
         </Button>
@@ -103,7 +104,7 @@ export default function HistoryPage() {
         </Button>
       </div>
       {/* Search Form */}
-      <Card className="my-8">
+      <Card className="my-8 hidden md:block">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Search className="h-5 w-5" />
