@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Send, Loader2, CheckCircle, AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRecording } from "@/context/RecordingContext";
-import { formatTime, uploadRecordingToBothServices, UploadProgress, clearGoogleDriveSession } from "@/lib/recording-utils";
+import { formatTime, uploadRecordingToBothServices, UploadProgress, clearGoogleDriveSession, stopAllMediaTracks } from "@/lib/recording-utils";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
@@ -55,7 +55,6 @@ export default function VideoReview() {
       setIsGettingCsmList(true)
       const response = await fetch(webhookurl);
       const data = await response.json();
-      console.log("CSM list:", data);
       if (data && formData?.email) {
         const result = data.filter(
           (e: { '✍️ Email': string; '🚫 Full Name': string }) => e['✍️ Email'] == formData.email
@@ -99,7 +98,6 @@ export default function VideoReview() {
   // Set PC iframe video height if embedded via iframe and on PC
   useEffect(() => {
 
-    console.log('isInIframe,', isInIframe, 'isMobile', isMobile);
     if (isInIframe && !isMobile) {
       setPcIframeVideoHeight('400px');
     } else {
@@ -187,8 +185,9 @@ export default function VideoReview() {
     }, 100);
   };
 
-  // Cleanup on component unmount
+  // Cleanup on component mount and unmount
   useEffect(() => {
+    cleanupMediaStreams();
     return () => {
       console.log("VideoReview unmounting, cleaning up...");
       cleanupMediaStreams();
@@ -287,6 +286,10 @@ export default function VideoReview() {
     setUploadProgress({});
     performSubmission(true);
   };
+
+  useEffect(() => {
+    stopAllMediaTracks();
+  }, []);
 
   if (!recordedData?.videoBlob) {
     return null;

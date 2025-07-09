@@ -40,6 +40,15 @@ const calculateMobileVideoHeight = () => {
   return `${Math.max(availableHeight, 300)}px`; // Minimum 300px
 };
 
+// After obtaining a stream (camera, mic, screen), push it to window.localStreams and log it
+function trackStream(stream: any, label: any) {
+  if (typeof window !== 'undefined') {
+    (window as any).localStreams = (window as any).localStreams || [];
+    (window as any).localStreams.push(stream);
+    console.log(`[trackStream] Added ${label} stream to window.localStreams. Total now:`, (window as any).localStreams.length);
+  }
+}
+
 export default function VideoRecorder() {
   const router = useRouter();
   const { formData, setRecordedData } = useRecording();
@@ -156,6 +165,7 @@ export default function VideoRecorder() {
             });
             console.log("Camera stream obtained:", stream);
             cameraStreamRef.current = stream;
+            trackStream(stream, 'camera');
           } catch (error: any) {
             console.error("Camera access failed:", error);
 
@@ -194,6 +204,7 @@ export default function VideoRecorder() {
             });
             console.log("Microphone stream obtained:", stream);
             audioStreamRef.current = stream;
+            trackStream(stream, 'microphone');
           } catch (error: any) {
             console.error("Microphone access failed:", error);
 
@@ -232,14 +243,14 @@ export default function VideoRecorder() {
               audio: false,
             });
             console.log("Screen share obtained:", stream);
+            screenStreamRef.current = stream;
+            trackStream(stream, 'screen');
 
             // Add event listener for when user stops screen sharing
             stream.getVideoTracks()[0].onended = () => {
               console.log("Screen share ended by user");
               setSettings(prev => ({ ...prev, screenShareEnabled: false }));
             };
-
-            screenStreamRef.current = stream;
           } catch (error: any) {
             console.error("Screen share failed:", error);
 
@@ -642,7 +653,7 @@ export default function VideoRecorder() {
         <>
           {/* Header */}
           <div className="md:p-4 p-0 border-b flex-shrink-0">
-            <div className="container flex items-center justify-between">
+            <div className="flex items-center justify-between">
               <Button
                 variant="ghost"
                 size="icon"

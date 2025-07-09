@@ -699,3 +699,57 @@ export async function submitFormData(formData: any): Promise<void> {
     throw error;
   }
 }
+
+// Utility to stop all media tracks from all video/audio elements and global refs
+export function stopAllMediaTracks() {
+  console.log('[stopAllMediaTracks] Called');
+  // Stop all tracks from all video/audio elements
+  if (typeof document !== 'undefined') {
+    const elements = Array.from(document.querySelectorAll('video, audio'));
+    console.log(`[stopAllMediaTracks] Found ${elements.length} video/audio elements`);
+    elements.forEach((el, idx) => {
+      // @ts-ignore
+      if (el.srcObject && el.srcObject.getTracks) {
+        // @ts-ignore
+        const tracks: any[] = el.srcObject.getTracks();
+        console.log(`[stopAllMediaTracks] Element #${idx} has ${tracks.length} tracks`);
+        tracks.forEach((track: any, tIdx: any) => {
+          try {
+            track.stop();
+            console.log(`[stopAllMediaTracks] Stopped track #${tIdx} (${track.kind}) on element #${idx}`);
+          } catch (err) {
+            console.warn(`[stopAllMediaTracks] Failed to stop track #${tIdx} on element #${idx}:`, err);
+          }
+        });
+        // @ts-ignore
+        el.srcObject = null;
+        console.log(`[stopAllMediaTracks] Cleared srcObject for element #${idx}`);
+      } else {
+        console.log(`[stopAllMediaTracks] Element #${idx} has no srcObject or getTracks`);
+      }
+    });
+  } else {
+    console.log('[stopAllMediaTracks] document is undefined');
+  }
+  // Stop any globally tracked streams (if used)
+  if (typeof window !== 'undefined' && (window as any).localStreams) {
+    const localStreams: any[] = (window as any).localStreams;
+    console.log(`[stopAllMediaTracks] Found ${localStreams.length} global localStreams`);
+    localStreams.forEach((stream: any, sIdx: any) => {
+      const tracks: any[] = stream.getTracks();
+      console.log(`[stopAllMediaTracks] Global stream #${sIdx} has ${tracks.length} tracks`);
+      tracks.forEach((track: any, tIdx: any) => {
+        try {
+          track.stop();
+          console.log(`[stopAllMediaTracks] Stopped track #${tIdx} (${track.kind}) on global stream #${sIdx}`);
+        } catch (err) {
+          console.warn(`[stopAllMediaTracks] Failed to stop track #${tIdx} on global stream #${sIdx}:`, err);
+        }
+      });
+    });
+    (window as any).localStreams = [];
+    console.log('[stopAllMediaTracks] Cleared window.localStreams');
+  } else {
+    console.log('[stopAllMediaTracks] No global localStreams found');
+  }
+}

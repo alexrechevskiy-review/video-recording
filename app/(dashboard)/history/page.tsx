@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { useRecording } from "@/context/RecordingContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { AlertDialogContent } from "@/components/ui/alert-dialog";
+import { stopAllMediaTracks } from "@/lib/recording-utils";
 
 interface FeedbackModalProps {
   isOpen: boolean;
@@ -77,6 +78,10 @@ export default function HistoryPage() {
   useEffect(() => {
     clearRecordedData();
   }, [clearRecordedData]);
+
+  useEffect(() => {
+    stopAllMediaTracks();
+  }, []);
 
   return (
     <main className="container mx-auto p-6 max-w-7xl">

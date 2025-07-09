@@ -4,6 +4,7 @@ import Link from "next/link";
 import { CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRecording } from "@/context/RecordingContext";
+import { stopAllMediaTracks } from "@/lib/recording-utils";
 
 export default function SuccessPage() {
   const { resetData } = useRecording();
@@ -12,6 +13,20 @@ export default function SuccessPage() {
   useEffect(() => {
     resetData();
   }, [resetData]);
+
+  useEffect(() => {
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+        .then(stream => {
+          stream.getTracks().forEach(track => track.stop());
+        })
+        .catch(() => { /* ignore errors */ });
+    }
+  }, []);
+
+  useEffect(() => {
+    stopAllMediaTracks();
+  }, []);
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4 md:p-8">
