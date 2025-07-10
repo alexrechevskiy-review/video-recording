@@ -148,21 +148,41 @@ export async function POST(request: NextRequest) {
                 const shortcutUserFolderResult = await shortcutUserFolderResponse;
                 shortcutUserFolderId = shortcutUserFolderResult.data.id!;
             }
-            // 2. Create shortcut to the user's uploaded folder inside this folder
-            const shortcutMetadata = {
-                name: `${userFolderName} video submission`,
-                mimeType: 'application/vnd.google-apps.shortcut',
-                parents: [shortcutUserFolderId!],
-                shortcutDetails: {
-                    targetId: userFolderId,
-                },
-            };
-            const shortcutResponse = await drive.files.create({
-                requestBody: shortcutMetadata,
-                fields: 'id',
+            // 2. Check for existing shortcut to the user's uploaded folder inside this folder
+            // List all shortcut files in the shortcutUserFolderId folder
+            const existingShortcutsResponse = await drive.files.list({
+                q: `mimeType='application/vnd.google-apps.shortcut' and parents in '${shortcutUserFolderId}' and trashed=false`,
+                fields: 'files(id, name, shortcutDetails)',
             });
-            const shortcutResult = await shortcutResponse;
-            shortcutId = shortcutResult.data.id!;
+            let foundShortcut = null;
+            if (existingShortcutsResponse.data.files && existingShortcutsResponse.data.files.length > 0) {
+                for (const shortcut of existingShortcutsResponse.data.files) {
+                    // shortcut.shortcutDetails?.targetId may be undefined if not populated, so check
+                    if (shortcut.shortcutDetails && shortcut.shortcutDetails.targetId === userFolderId) {
+                        foundShortcut = shortcut;
+                        break;
+                    }
+                }
+            }
+            if (foundShortcut) {
+                shortcutId = foundShortcut.id || undefined;
+            } else {
+                // Create shortcut to the user's uploaded folder inside this folder
+                const shortcutMetadata = {
+                    name: `${userFolderName} video submission`,
+                    mimeType: 'application/vnd.google-apps.shortcut',
+                    parents: [shortcutUserFolderId!],
+                    shortcutDetails: {
+                        targetId: userFolderId,
+                    },
+                };
+                const shortcutResponse = await drive.files.create({
+                    requestBody: shortcutMetadata,
+                    fields: 'id',
+                });
+                const shortcutResult = await shortcutResponse;
+                shortcutId = shortcutResult.data.id!;
+            }
         }
 
         return NextResponse.json({
