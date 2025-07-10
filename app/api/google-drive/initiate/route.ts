@@ -17,12 +17,11 @@ export async function POST(request: NextRequest) {
                 client_email: process.env.NEXT_GOOGLE_CLIENT_EMAIL,
                 private_key: process.env.NEXT_GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
             },
-            scopes: ['https://www.googleapis.com/auth/drive.file'],
+            scopes: ['https://www.googleapis.com/auth/drive'],
         });
 
         const authClient = await auth.getClient();
         const accessToken = await authClient.getAccessToken();
-
         if (!accessToken.token) {
             throw new Error('Failed to get access token');
         }
@@ -107,7 +106,7 @@ export async function POST(request: NextRequest) {
                 body: JSON.stringify(metadata),
             }
         );
-
+        console.log(response);
         if (!response.ok) {
             throw new Error(`Failed to initiate upload: ${response.status} ${response.statusText}`);
         }
