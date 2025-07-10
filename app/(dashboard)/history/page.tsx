@@ -207,7 +207,7 @@ export default function HistoryPage() {
                   {data.submissions.map((submission, index) => (
                     <div key={submission.id || index} className="p-4 flex justify-between items-center border rounded-lg bg-card text-card-foreground shadow-sm mt-4">
                       <Link href={submission['Submission link'] ?? ''} target="_blank">
-                        <h4 className="font-medium">Introduction Video</h4>
+                        <h4 className="font-medium">Interview Prompt</h4>
                         <div className="text-sm text-gray-500">
                           Submitted&nbsp;
                           {(() => {
