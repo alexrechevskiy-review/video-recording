@@ -220,8 +220,10 @@ export default function HistoryPage() {
                                 ? '1 day ago'
                                 : `${diffDays} days ago`;
                           })()}
-                          <span className="mx-2">•</span>
-                          {submission['Len of Video (min)'] ? `${submission['Len of Video (min)']}m` : ''}
+                          
+                          {submission['Len of Video (min)'] ? <>
+                            <span className="mx-2">•</span>`${submission['Len of Video (min)']}m`
+                          </> : ''}
                         </div>
                       </Link>
                       <div className="flex items-center gap-2">
