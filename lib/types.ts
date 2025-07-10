@@ -39,6 +39,7 @@ export type SubmissionRecord = {
   Status: string;
   'Submission link': string | null;
   'Coach\'s Feedback': string;
+  'Len of Video (min)': string;
   createdTime: string;
 };
 

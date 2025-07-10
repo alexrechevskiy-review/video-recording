@@ -14,6 +14,8 @@ import { useRecording } from "@/context/RecordingContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { AlertDialogContent } from "@/components/ui/alert-dialog";
 import { stopAllMediaTracks } from "@/lib/recording-utils";
+import { differenceInDays } from 'date-fns';
+import Link from "next/link";
 
 interface FeedbackModalProps {
   isOpen: boolean;
@@ -202,55 +204,41 @@ export default function HistoryPage() {
                 </div>
               ) : (
                 <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>ID</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Submission Link</TableHead>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {data.submissions.map((submission, index) => (
-                        <TableRow key={submission.id || index}>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              {submission.id}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              {submission.Status}
-                            </div>
-                          </TableCell>
-                          <TableCell className="max-w-[300px] overflow-hidden">
-                            <div className="flex items-center gap-2 w-full">
-                              {submission['Submission link']}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              {new Date(submission.createdTime).toLocaleDateString()}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setSelectedFeedback(submission['Coach\'s Feedback'] || '');
-                                setIsFeedbackModalOpen(true);
-                              }}
-                            >
-                              View Feedback
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                  {data.submissions.map((submission, index) => (
+                    <div key={submission.id || index} className="p-4 flex justify-between items-center border rounded-lg bg-card text-card-foreground shadow-sm mt-4">
+                      <Link href={submission['Submission link'] ?? ''} target="_blank">
+                        <h4 className="font-medium">Introduction Video</h4>
+                        <div className="text-sm text-gray-500">
+                          Submitted&nbsp;
+                          {(() => {
+                            const now = new Date();
+                            const created = new Date(submission.createdTime);
+                            const diffDays = differenceInDays(now, created);
+                            return diffDays === 0
+                              ? 'Today'
+                              : diffDays === 1
+                                ? '1 day ago'
+                                : `${diffDays} days ago`;
+                          })()}
+                          <span className="mx-2">•</span>
+                          {submission['Len of Video (min)'] ?? '**'}m
+                        </div>
+                      </Link>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedFeedback(submission['Coach\'s Feedback'] || '');
+                            setIsFeedbackModalOpen(true);
+                          }}
+                        >
+                          <FileText />
+                          View Feedback
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </CardContent>
