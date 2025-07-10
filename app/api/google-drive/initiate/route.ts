@@ -20,8 +20,12 @@ export async function POST(request: NextRequest) {
             scopes: ['https://www.googleapis.com/auth/drive'],
         });
 
+        // Log which service account is being used
+        console.log('Google Service Account (initiate):', process.env.NEXT_GOOGLE_CLIENT_EMAIL);
+
         const authClient = await auth.getClient();
         const accessToken = await authClient.getAccessToken();
+        console.log('Access token obtained:', !!accessToken.token);
         if (!accessToken.token) {
             throw new Error('Failed to get access token');
         }
@@ -46,6 +50,8 @@ export async function POST(request: NextRequest) {
             const folderSearchResponse = await drive.files.list({
                 q: `name='${userEmail}' and parents in '${parentFolderId}' and mimeType='application/vnd.google-apps.folder' and trashed=false`,
                 fields: 'files(id, name)',
+                supportsAllDrives: true,
+                includeItemsFromAllDrives: true,
             });
 
             const files = folderSearchResponse.data.files;
@@ -64,26 +70,31 @@ export async function POST(request: NextRequest) {
                 const folderResponse = await drive.files.create({
                     requestBody: folderMetadata,
                     fields: 'id',
+                    supportsAllDrives: true,
                 });
 
                 userFolderId = folderResponse.data.id!;
                 console.log(`Created new folder for ${userEmail}: ${userFolderId}`);
 
-                // 2. Share folder with a specific email (only if not already shared)
-                const permissions = await drive.permissions.list({ fileId: userFolderId });
-                const alreadyShared = permissions.data.permissions?.some(
-                    p => p.emailAddress === userEmail
-                );
-                if (!alreadyShared) {
-                    await drive.permissions.create({
-                        fileId: userFolderId,
-                        requestBody: {
-                            type: "user",
-                            role: "writer",
-                            emailAddress: userEmail,
-                        },
-                    });
-                }
+                // // 2. Share folder with a specific email (only if not already shared)
+                // const permissions = await drive.permissions.list({ 
+                //     fileId: userFolderId,
+                //     supportsAllDrives: true,
+                // });
+                // const alreadyShared = permissions.data.permissions?.some(
+                //     p => p.emailAddress === userEmail
+                // );
+                // if (!alreadyShared) {
+                //     await drive.permissions.create({
+                //         fileId: userFolderId,
+                //         requestBody: {
+                //             type: "user",
+                //             role: "writer",
+                //             emailAddress: userEmail,
+                //         },
+                //         supportsAllDrives: true,
+                //     });
+                // }
             }
         } catch (folderError) {
             console.error('Error managing user folder:', folderError);
@@ -95,12 +106,12 @@ export async function POST(request: NextRequest) {
             name: fileName,
             parents: [userFolderId],
             mimeType: mimeType,
-            description: csmName !== '' ? `Submitted by: ${csmName}` : undefined,
+            // description: csmName !== '' ? `Submitted by: ${csmName}` : undefined,
         };
 
         // Initiate resumable upload session using direct fetch
         const response = await fetch(
-            'https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable',
+            'https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&supportsAllDrives=true',
             {
                 method: 'POST',
                 headers: {
@@ -114,11 +125,15 @@ export async function POST(request: NextRequest) {
         );
         console.log(response);
         if (!response.ok) {
+            // Get the actual error response from Google
+            const errorBody = await response.text();
+            console.error('Google Drive error response:', errorBody);
             throw new Error(`Failed to initiate upload: ${response.status} ${response.statusText}`);
         }
 
         // Get the resumable session URI from the Location header
         const sessionUri = response.headers.get('Location');
+        console.log('Session URI:', sessionUri);
 
         if (!sessionUri) {
             throw new Error('No session URI received from Google Drive');
@@ -136,6 +151,8 @@ export async function POST(request: NextRequest) {
             const shortcutUserFolderSearch = await drive.files.list({
                 q: `name='${userFolderName}' and parents in '${shortcutParentFolderId}' and mimeType='application/vnd.google-apps.folder' and trashed=false`,
                 fields: 'files(id, name)',
+                supportsAllDrives: true,
+                includeItemsFromAllDrives: true,
             });
             if (shortcutUserFolderSearch.data.files && shortcutUserFolderSearch.data.files.length > 0) {
                 shortcutUserFolderId = shortcutUserFolderSearch.data.files[0].id!;
@@ -149,6 +166,7 @@ export async function POST(request: NextRequest) {
                 const shortcutUserFolderResponse = await drive.files.create({
                     requestBody: shortcutUserFolderMetadata,
                     fields: 'id',
+                    supportsAllDrives: true,
                 });
                 const shortcutUserFolderResult = await shortcutUserFolderResponse;
                 shortcutUserFolderId = shortcutUserFolderResult.data.id!;
@@ -158,6 +176,8 @@ export async function POST(request: NextRequest) {
             const existingShortcutsResponse = await drive.files.list({
                 q: `mimeType='application/vnd.google-apps.shortcut' and parents in '${shortcutUserFolderId}' and trashed=false`,
                 fields: 'files(id, name, shortcutDetails)',
+                supportsAllDrives: true,
+                includeItemsFromAllDrives: true,
             });
             let foundShortcut = null;
             if (existingShortcutsResponse.data.files && existingShortcutsResponse.data.files.length > 0) {
@@ -184,6 +204,7 @@ export async function POST(request: NextRequest) {
                 const shortcutResponse = await drive.files.create({
                     requestBody: shortcutMetadata,
                     fields: 'id',
+                    supportsAllDrives: true,
                 });
                 const shortcutResult = await shortcutResponse;
                 shortcutId = shortcutResult.data.id!;
