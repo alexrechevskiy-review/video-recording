@@ -163,7 +163,7 @@ export default function AssessmentForm() {
             value={submissionType}
             onChange={(value) => setValue("submissionType", value as SubmissionType)}
             items={[
-              { value: SubmissionType.LOOM, label: "Loom Baseline Assessment" },
+              { value: SubmissionType.LOOM, label: "Baseline Assessment" },
               { value: SubmissionType.MASTERCLASS, label: "Masterclass Assignment" },
               { value: SubmissionType.COMPANY, label: "Company Assignment" },
             ]}
