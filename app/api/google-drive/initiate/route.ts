@@ -76,25 +76,25 @@ export async function POST(request: NextRequest) {
                 userFolderId = folderResponse.data.id!;
                 console.log(`Created new folder for ${userEmail}: ${userFolderId}`);
 
-                // // 2. Share folder with a specific email (only if not already shared)
-                // const permissions = await drive.permissions.list({ 
-                //     fileId: userFolderId,
-                //     supportsAllDrives: true,
-                // });
-                // const alreadyShared = permissions.data.permissions?.some(
-                //     p => p.emailAddress === userEmail
-                // );
-                // if (!alreadyShared) {
-                //     await drive.permissions.create({
-                //         fileId: userFolderId,
-                //         requestBody: {
-                //             type: "user",
-                //             role: "writer",
-                //             emailAddress: userEmail,
-                //         },
-                //         supportsAllDrives: true,
-                //     });
-                // }
+                // 2. Share folder with a specific email (only if not already shared)
+                const permissions = await drive.permissions.list({ 
+                    fileId: userFolderId,
+                    supportsAllDrives: true,
+                });
+                const alreadyShared = permissions.data.permissions?.some(
+                    p => p.emailAddress === userEmail
+                );
+                if (!alreadyShared) {
+                    await drive.permissions.create({
+                        fileId: userFolderId,
+                        requestBody: {
+                            type: "user",
+                            role: "writer",
+                            emailAddress: userEmail,
+                        },
+                        supportsAllDrives: true,
+                    });
+                }
             }
         } catch (folderError) {
             console.error('Error managing user folder:', folderError);
