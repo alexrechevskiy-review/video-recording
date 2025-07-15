@@ -243,7 +243,7 @@ export default function HistoryPage() {
           Record another video
         </Button>
       </div>
-      <div className="text-center">
+      {/* <div className="text-center mb-4">
         <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-100 mb-4">
           <Check className="w-6 h-6 text-green-600" />
         </div>
@@ -255,7 +255,7 @@ export default function HistoryPage() {
         >
           Record another video
         </Button>
-      </div>
+      </div> */}
       {/* Search Form */}
       <Card className="my-8 hidden md:block">
         <CardHeader>
