@@ -136,10 +136,9 @@ const FeedbackModal: React.FC<FeedbackModalProps & { feedback?: StructuredFeedba
             <div className="text-sm text-muted-foreground mb-4">Feedback provided on {feedback.date}</div>
             <div className="bg-blue-50 border border-blue-100 rounded-lg max-h-[45vh] p-4 overflow-y-auto">
               {
-                selectedSubmission['Feedback Report Google Doc (Sharable)'] && 
-                <Link className="underline text-right text-sm w-full" href={selectedSubmission['Feedback Report Google Doc (Sharable)']}>
-                <p>View Google Doc</p>
-              </Link>
+                <Link className="underline text-right text-sm w-full" href={`selectedSubmission['Feedback Report Google Doc (Sharable)']`}>
+                  <p>View Google Doc</p>
+                </Link>
               }
               {feedback.blocks && feedback.blocks.length > 0 ? (
                 <div className="space-y-3">
@@ -158,10 +157,10 @@ const FeedbackModal: React.FC<FeedbackModalProps & { feedback?: StructuredFeedba
                       return (
                         <ul key={`${idx}-ul`} className="text-base leading-relaxed list-disc ml-6">
                           {filteredContent.map((part, i) =>
-                              typeof part === "string"
-                                ? <>{part}<br/><br/></>
-                                : <li key={`${i}-${idx}`} className="font-semibold">{part.text}</li>
-                            )
+                            typeof part === "string"
+                              ? <>{part}<br /><br /></>
+                              : <li key={`${i}-${idx}`} className="font-semibold">{part.text}</li>
+                          )
                           }
                         </ul>
                       );
@@ -257,50 +256,52 @@ export default function HistoryPage() {
         </Button>
       </div> */}
       {/* Search Form */}
-      <Card className="my-8 hidden md:block">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Search className="h-5 w-5" />
-            Your Previous Submissions
-          </CardTitle>
-          <CardDescription>
-            Enter an email address to view submission history
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSearch} className="flex gap-4">
-            <div className="flex-1">
-              <Label htmlFor="email" className="sr-only">
-                Email Address
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="Enter email address..."
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full"
-              />
-            </div>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Searching...
-                </>
-              ) : (
-                <>
-                  <Search className="h-4 w-4 mr-2" />
-                  Search
-                </>
-              )}
-            </Button>
-          </form>
-          <p className="text-sm text-muted-foreground mt-2">
-            Test: nidhig318@gmail.com
-          </p>
-        </CardContent>
-      </Card>
+      {!formData?.email &&
+        <Card className="my-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Search className="h-5 w-5" />
+              Your Previous Submissions
+            </CardTitle>
+            <CardDescription>
+              Enter an email address to view submission history
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSearch} className="flex gap-4">
+              <div className="flex-1">
+                <Label htmlFor="email" className="sr-only">
+                  Email Address
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Enter email address..."
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full"
+                />
+              </div>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Searching...
+                  </>
+                ) : (
+                  <>
+                    <Search className="h-4 w-4 mr-2" />
+                    Search
+                  </>
+                )}
+              </Button>
+            </form>
+            <p className="text-sm text-muted-foreground mt-2">
+              Test: nidhig318@gmail.com
+            </p>
+          </CardContent>
+        </Card>
+      }
 
       {/* Results */}
       {
