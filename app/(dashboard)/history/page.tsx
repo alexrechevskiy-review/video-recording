@@ -132,14 +132,14 @@ const FeedbackModal: React.FC<FeedbackModalProps & { feedback?: StructuredFeedba
         </DialogHeader>
         {feedback ? (
           <div className="mt-2">
-            <div className="mb-1 flex justify-between gap-4">
+            <div className="mb-1 flex justify-between gap-4 items-center">
               <div className="flex flex-col">
                 <h2 className="font-semibold text-xl ">{feedback.title}</h2>
                 <div className="text-sm text-muted-foreground">Feedback provided on {feedback.date}</div>
               </div>
               <div className="flex flex-col">
-                <h2 className="font-semibold text-xl ">{selectedSubmission['Proficiency Score (Hire Rubric)'] ? selectedSubmission['Proficiency Score (Hire Rubric)'] : ''}</h2>
-                <div className="text-sm text-muted-foreground">{selectedSubmission['Proficiency Score (Hire Rubric)'] && 'Proficiency Score'}</div>
+                <h2 className="font-semibold text-sm text-center">{selectedSubmission['Proficiency Score (Hire Rubric)'] ? selectedSubmission['Proficiency Score (Hire Rubric)'] : ''}</h2>
+                <div className="text-sm text-muted-foreground text-center">{selectedSubmission['Proficiency Score (Hire Rubric)'] && 'Proficiency Score'}</div>
               </div>
             </div>
             {selectedSubmission['Feedback Report Google Doc (Sharable)'] &&
