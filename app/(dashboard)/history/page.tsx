@@ -232,7 +232,7 @@ export default function HistoryPage() {
 
   return (
     <main className="container mx-auto p-6 max-w-7xl">
-      <div className="mb-8 w-full flex flex-col md:flex-row items-center justify-between gap-4">
+      {/* <div className="mb-8 w-full flex flex-col md:flex-row items-center justify-between gap-4">
         <h1 className="text-3xl font-bold tracking-tight mb-2">Video Submission Portal</h1>
         <Button
           onClick={handleBack}
@@ -241,7 +241,7 @@ export default function HistoryPage() {
         >
           Record another video
         </Button>
-      </div>
+      </div> */}
       {/* <div className="text-center mb-4">
         <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-100 mb-4">
           <Check className="w-6 h-6 text-green-600" />
@@ -362,6 +362,9 @@ export default function HistoryPage() {
                             : 'Interview Prompt'}
                         </h4>
                         <div className="text-sm text-gray-500">
+                          {submission['Interview Type']}
+                        </div>
+                        <div className="text-sm text-gray-500">
                           <span>
                             Submitted&nbsp;
                             {(() => {
@@ -396,9 +399,6 @@ export default function HistoryPage() {
                               })()}
                             </> : ''}
                           </span>
-                          <span>
-                            &nbsp;•&nbsp;{submission['Type of Submission']}
-                          </span>
                         </div>
                       </Link>
                       <div className="flex flex-col items-center gap-2">
@@ -421,14 +421,9 @@ export default function HistoryPage() {
                           <FileText />
                           View Feedback
                         </Button>
-                        {submission['Proficiency score Numeric'] &&
-                          <div>
-                            Score: {submission['Proficiency score Numeric']}
+                          <div className="text-sm text-gray-500">
+                            {submission['Type of Submission']}{submission['Proficiency score Numeric'] && ` : ${submission['Proficiency score Numeric']}`}
                           </div>
-                        }
-                        <div>
-                          {submission['Interview Type']}
-                        </div>
                       </div>
                     </div>
                   ))}
