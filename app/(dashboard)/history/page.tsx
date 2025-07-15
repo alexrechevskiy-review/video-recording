@@ -402,28 +402,30 @@ export default function HistoryPage() {
                         </div>
                       </Link>
                       <div className="flex flex-col items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          disabled={!(submission.Status === "Done" || submission["Coach's Feedback"] !== "")}
-                          onClick={() => {
-                            setSelectedFeedback(
-                              parseFeedbackBlocks(
-                                submission['Coach\'s Feedback'] || '',
-                                submission['Interview Prompt'],
-                                submission['🤖✍️ Date Reviewed'] ? new Date(submission['🤖✍️ Date Reviewed']).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : (submission['Submission Time'] ? new Date(submission['Submission Time']).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : '')
-                              )
-                            );
-                            setSelectedSubmission(submission)
-                            setIsFeedbackModalOpen(true);
-                          }}
-                        >
-                          <FileText />
-                          View Feedback
-                        </Button>
-                          <div className="text-sm text-gray-500">
-                            {submission['Type of Submission']}{submission['Proficiency score Numeric'] && ` : ${submission['Proficiency score Numeric']}`}
-                          </div>
+                        {submission.Status === "Done" || submission["Coach's Feedback"] !== null ?
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={!(submission.Status === "Done" || submission["Coach's Feedback"] !== "")}
+                            onClick={() => {
+                              setSelectedFeedback(
+                                parseFeedbackBlocks(
+                                  submission['Coach\'s Feedback'] || '',
+                                  submission['Interview Prompt'],
+                                  submission['🤖✍️ Date Reviewed'] ? new Date(submission['🤖✍️ Date Reviewed']).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : (submission['Submission Time'] ? new Date(submission['Submission Time']).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : '')
+                                )
+                              );
+                              setSelectedSubmission(submission)
+                              setIsFeedbackModalOpen(true);
+                            }}
+                          >
+                            <FileText />
+                            View Feedback
+                          </Button> : <div className="border rounded-full py-1 px-2 text-[12px] bg-amber-500/20">{submission.Status}</div>
+                        }
+                        <div className="text-sm text-gray-500">
+                          {submission['Type of Submission']}{submission['Proficiency score Numeric'] && ` : ${submission['Proficiency score Numeric']}`}
+                        </div>
                       </div>
                     </div>
                   ))}
