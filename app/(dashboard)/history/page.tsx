@@ -132,14 +132,22 @@ const FeedbackModal: React.FC<FeedbackModalProps & { feedback?: StructuredFeedba
         </DialogHeader>
         {feedback ? (
           <div className="mt-2">
-            <div className="font-semibold text-xl mb-1">{feedback.title}</div>
-            <div className="text-sm text-muted-foreground mb-4">Feedback provided on {feedback.date}</div>
-            <div className="bg-blue-50 border border-blue-100 rounded-lg max-h-[45vh] p-4 overflow-y-auto">
-              {
-                <Link className="underline text-right text-sm w-full" href={`selectedSubmission['Feedback Report Google Doc (Sharable)']`}>
-                  <p>View Google Doc</p>
-                </Link>
-              }
+            <div className="mb-1 flex justify-between gap-4">
+              <div className="flex flex-col">
+                <h2 className="font-semibold text-xl ">{feedback.title}</h2>
+                <div className="text-sm text-muted-foreground">Feedback provided on {feedback.date}</div>
+              </div>
+              <div className="flex flex-col">
+                <h2 className="font-semibold text-xl ">{selectedSubmission['Proficiency Score (Hire Rubric)'] ? selectedSubmission['Proficiency Score (Hire Rubric)'] : ''}</h2>
+                <div className="text-sm text-muted-foreground">{selectedSubmission['Proficiency Score (Hire Rubric)'] && 'Proficiency Score'}</div>
+              </div>
+            </div>
+            {selectedSubmission['Feedback Report Google Doc (Sharable)'] &&
+              <Link className="underline text-sm text-muted-foreground w-full" href={selectedSubmission['Feedback Report Google Doc (Sharable)']}>
+                <p>View Google Doc</p>
+              </Link>
+            }
+            <div className="bg-blue-50 border mt-4 border-blue-100 rounded-lg max-h-[45vh] p-4 overflow-y-auto">
               {feedback.blocks && feedback.blocks.length > 0 ? (
                 <div className="space-y-3">
                   {feedback.blocks.map((block, idx) => {
@@ -172,7 +180,6 @@ const FeedbackModal: React.FC<FeedbackModalProps & { feedback?: StructuredFeedba
                 <div>No feedback available.</div>
               )}
             </div>
-            <div className="mt-4">Proficiency Score (Hire Rubric) : {selectedSubmission['Proficiency Score (Hire Rubric)'] ? selectedSubmission['Proficiency Score (Hire Rubric)'] : ''}</div>
           </div>
         ) : (
           <div>No feedback available.</div>
