@@ -79,6 +79,9 @@ export default function VideoRecorder() {
 
   const combinedStreamRef = useRef<MediaStream | null>(null);
 
+  // Add this ref at the top of the VideoRecorder component
+  const recordingStartTimeRef = useRef<number | null>(null);
+
   const isMobile = isMobileDevice();
   const isInIframe = typeof window !== 'undefined' && window.self !== window.top;
   const [mobileVideoHeight, setMobileVideoHeight] = useState<string>('auto');
@@ -340,6 +343,9 @@ export default function VideoRecorder() {
       const recorder = createRecorder(combinedStreamRef.current);
       mediaRecorderRef.current = recorder;
 
+      // Set the start time
+      recordingStartTimeRef.current = Date.now();
+
       recorder.ondataavailable = (event) => {
         if (event.data && event.data.size > 0) {
           recordedChunksRef.current.push(event.data);
@@ -351,9 +357,15 @@ export default function VideoRecorder() {
           type: "video/webm",
         });
 
+        // Calculate the duration based on start time
+        let duration = recordingDuration;
+        if (recordingStartTimeRef.current) {
+          duration = Math.round((Date.now() - recordingStartTimeRef.current) / 1000);
+        }
+
         setRecordedData({
           videoBlob: recordedBlob,
-          duration: recordingDuration,
+          duration,
         });
 
         router.push("/review");
