@@ -402,7 +402,7 @@ export default function HistoryPage() {
                           >
                             <FileText />
                             View Feedback
-                          </Button> : <div className="border rounded-full py-1 px-2 text-[12px] bg-amber-500/20">{submission.Status}</div>
+                          </Button> : <div className={`border rounded-full py-1 px-2 text-[12px] ${submission.Status == 'Dropped/ Cancelled' ? 'bg-gray-500/20' : 'bg-amber-500/20'}`}>{submission.Status}</div>
                         }
                         <div className="text-sm text-gray-500">
                           {submission['Type of Submission']}{submission['Proficiency score Numeric'] && ` : ${submission['Proficiency score Numeric']}`}
