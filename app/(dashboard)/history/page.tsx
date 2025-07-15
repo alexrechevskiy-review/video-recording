@@ -6,33 +6,178 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Loader2, Search, FileText, ArrowLeft, Check } from "lucide-react";
+import { Loader2, Search, FileText, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { useRecording } from "@/context/RecordingContext";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { AlertDialogContent } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { stopAllMediaTracks } from "@/lib/recording-utils";
 import { differenceInDays } from 'date-fns';
 import Link from "next/link";
 
+// 1. Update FeedbackModalProps to accept structured feedback
+interface StructuredFeedback {
+  title: string;
+  date: string;
+  summary: string;
+  points: string[];
+}
+
 interface FeedbackModalProps {
   isOpen: boolean;
   onClose: () => void;
-  feedback: string;
+  feedback: StructuredFeedback | null;
+  selectedSubmission: any
 }
 
-const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, feedback }) => {
+// 2. Helper to parse feedback string into structured blocks (headings, bold, paragraphs)
+
+type FeedbackBlock =
+  | { type: 'heading'; level: 1 | 2 | 3; text: string }
+  | { type: 'paragraph'; content: (string | { type: 'bold'; text: string })[] };
+
+function parseFeedbackBlocks(feedback: string, title: string, date: string): StructuredFeedback & { blocks: FeedbackBlock[] } {
+  if (!feedback) {
+    return {
+      title,
+      date,
+      summary: 'No feedback available.',
+      points: [],
+      blocks: [],
+    };
+  }
+  const lines = feedback.split(/\r?\n/).map(l => l.trim());
+  const blocks: FeedbackBlock[] = [];
+  let paragraph: (string | { type: 'bold'; text: string })[] = [];
+
+  function pushParagraph() {
+    if (paragraph.length > 0) {
+      blocks.push({ type: 'paragraph', content: paragraph });
+      paragraph = [];
+    }
+  }
+
+  for (const line of lines) {
+    if (!line) {
+      pushParagraph();
+      continue;
+    }
+    if (line.startsWith('###')) {
+      pushParagraph();
+      let text = line.replace(/^###\s*/, '');
+      // Remove leading/trailing ** for headings
+      text = text.replace(/^\*\*/, '').replace(/\*\*$/, '');
+      blocks.push({ type: 'heading', level: 3, text });
+    } else if (line.startsWith('##')) {
+      pushParagraph();
+      let text = line.replace(/^##\s*/, '');
+      text = text.replace(/^\*\*/, '').replace(/\*\*$/, '');
+      blocks.push({ type: 'heading', level: 2, text });
+    } else if (line.startsWith('#')) {
+      pushParagraph();
+      let text = line.replace(/^#\s*/, '');
+      text = text.replace(/^\*\*/, '').replace(/\*\*$/, '');
+      blocks.push({ type: 'heading', level: 1, text });
+    } else {
+      // Parse bold (**text**)
+      const parts: (string | { type: 'bold'; text: string })[] = [];
+      let rest = line;
+      while (rest.includes('**')) {
+        const start = rest.indexOf('**');
+        if (start > 0) {
+          parts.push(rest.slice(0, start));
+        }
+        const end = rest.indexOf('**', start + 2);
+        if (end > start + 2) {
+          parts.push({ type: 'bold', text: rest.slice(start + 2, end) });
+          rest = rest.slice(end + 2);
+        } else {
+          // unmatched **, treat as normal text
+          parts.push(rest);
+          rest = '';
+        }
+      }
+      if (rest) parts.push(rest);
+      paragraph.push(...parts);
+    }
+  }
+  pushParagraph();
+
+  // For compatibility, keep summary/points as before (optional)
+  return {
+    title,
+    date,
+    summary: '',
+    points: [],
+    blocks,
+  };
+}
+
+// 3. Update FeedbackModal to render blocks with headings and bold
+const FeedbackModal: React.FC<FeedbackModalProps & { feedback?: StructuredFeedback & { blocks?: FeedbackBlock[] } }> = ({ isOpen, onClose, feedback, selectedSubmission }) => {
+  // Extract elements from content which text is " " or "- "
+  function extractFilteredContent(content: (string | { type: 'bold'; text: string })[]) {
+    return content.filter(
+      (part) =>
+        (typeof part === "string" && part.trim() !== "" && part.trim() !== "-") ||
+        (typeof part === "object")
+    );
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className="max-w-4xl max-h-[80vh]">
         <DialogHeader>
-          <DialogTitle>Coach&apos;s Feedback</DialogTitle>
-          <DialogDescription className="pt-4 max-h-[80vh] overflow-y-auto">
-            {feedback || "No feedback available."}
-          </DialogDescription>
+          <DialogTitle className="text-2xl font-semibold">Coach Feedback</DialogTitle>
         </DialogHeader>
+        {feedback ? (
+          <div className="mt-2">
+            <div className="font-semibold text-xl mb-1">{feedback.title}</div>
+            <div className="text-sm text-muted-foreground mb-4">Feedback provided on {feedback.date}</div>
+            <div className="bg-blue-50 border border-blue-100 rounded-lg max-h-[45vh] p-4 overflow-y-auto">
+              {
+                selectedSubmission['Feedback Report Google Doc (Sharable)'] && 
+                <Link className="underline text-right text-sm w-full" href={selectedSubmission['Feedback Report Google Doc (Sharable)']}>
+                <p>View Google Doc</p>
+              </Link>
+              }
+              {feedback.blocks && feedback.blocks.length > 0 ? (
+                <div className="space-y-3">
+                  {feedback.blocks.map((block, idx) => {
+                    if (block.type === 'heading') {
+                      if (block.level === 1) {
+                        return <h2 key={idx} className="text-lg font-bold mt-4 mb-2">{block.text}</h2>;
+                      } else if (block.level === 2) {
+                        return <h3 key={idx} className="font-semibold mt-3 mb-1">{block.text}</h3>;
+                      } else {
+                        return <h4 key={idx} className="font-medium mt-2 mb-1">{block.text}</h4>;
+                      }
+                    } else if (block.type === 'paragraph') {
+                      // Only render elements from content which text is " " or "- "
+                      const filteredContent = extractFilteredContent(block.content);
+                      return (
+                        <ul key={`${idx}-ul`} className="text-base leading-relaxed list-disc ml-6">
+                          {filteredContent.map((part, i) =>
+                              typeof part === "string"
+                                ? <>{part}<br/><br/></>
+                                : <li key={`${i}-${idx}`} className="font-semibold">{part.text}</li>
+                            )
+                          }
+                        </ul>
+                      );
+                    }
+                    return null;
+                  })}
+                </div>
+              ) : (
+                <div>No feedback available.</div>
+              )}
+            </div>
+            <div className="mt-4">Proficiency Score (Hire Rubric) : {selectedSubmission['Proficiency Score (Hire Rubric)'] ? selectedSubmission['Proficiency Score (Hire Rubric)'] : ''}</div>
+          </div>
+        ) : (
+          <div>No feedback available.</div>
+        )}
       </DialogContent>
     </Dialog>
   );
@@ -42,7 +187,8 @@ export default function HistoryPage() {
   const [email, setEmail] = useState("");
   const [searchEmail, setSearchEmail] = useState(""); // This controls when the query runs
   const [hasSearched, setHasSearched] = useState(false);
-  const [selectedFeedback, setSelectedFeedback] = useState("");
+  const [selectedFeedback, setSelectedFeedback] = useState<StructuredFeedback | null>(null);
+  const [selectedSubmission, setSelectedSubmission] = useState<any>(null);
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
@@ -206,38 +352,82 @@ export default function HistoryPage() {
                 <div className="overflow-x-auto">
                   {data.submissions.map((submission, index) => (
                     <div key={submission.id || index} className="p-4 flex justify-between items-center border rounded-lg bg-card text-card-foreground shadow-sm mt-4">
-                      <Link href={submission['Submission link'] ?? ''} target="_blank">
-                        <h4 className="font-medium">Interview Prompt</h4>
+                      <Link href={submission['Submission link'] ?? ''} target="_blank" className="flex gap-2 flex-col">
+                        <h4 className="font-medium">
+                          {submission['Interview Prompt']
+                            ? submission['Interview Prompt'].length > 100
+                              ? submission['Interview Prompt'].slice(0, 100) + ' ...'
+                              : submission['Interview Prompt']
+                            : 'Interview Prompt'}
+                        </h4>
                         <div className="text-sm text-gray-500">
-                          Submitted&nbsp;
-                          {(() => {
-                            const now = new Date();
-                            const created = new Date(submission.createdTime);
-                            const diffDays = differenceInDays(now, created);
-                            return diffDays === 0
-                              ? 'Today'
-                              : diffDays === 1
-                                ? '1 day ago'
-                                : `${diffDays} days ago`;
-                          })()}
-                          
-                          {submission['Len of Video (min)'] ? <>
-                            <span className="mx-2">•</span>`${submission['Len of Video (min)']}m`
-                          </> : ''}
+                          <span>
+                            Submitted&nbsp;
+                            {(() => {
+                              const now = new Date();
+                              const created = new Date(submission['Submission Time']);
+                              const diffDays = differenceInDays(now, created);
+                              if (diffDays === 0) {
+                                const diffMs = now.getTime() - created.getTime();
+                                const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+                                const diffMinutes = Math.floor(diffMs / (1000 * 60));
+                                if (diffHours >= 1) {
+                                  return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+                                } else {
+                                  return `${diffMinutes} minute${diffMinutes !== 1 ? 's' : ''} ago`;
+                                }
+                              } else if (diffDays === 1) {
+                                return '1 day ago';
+                              } else {
+                                return `${diffDays} days ago`;
+                              }
+                            })()}
+                          </span>
+                          <span>
+                            {submission['Len of Video (min)'] ? <>
+                              <span className="mx-2">•</span>
+                              {(() => {
+                                const duration = parseFloat(submission['Len of Video (min)'] || "0");
+                                const totalSeconds = Math.round(duration * 60);
+                                const minutes = Math.floor(totalSeconds / 60);
+                                const seconds = totalSeconds % 60;
+                                return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                              })()}
+                            </> : ''}
+                          </span>
+                          <span>
+                            &nbsp;•&nbsp;{submission['Type of Submission']}
+                          </span>
                         </div>
                       </Link>
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-col items-center gap-2">
                         <Button
                           variant="outline"
                           size="sm"
+                          disabled={!(submission.Status === "Done" || submission["Coach's Feedback"] !== "")}
                           onClick={() => {
-                            setSelectedFeedback(submission['Coach\'s Feedback'] || '');
+                            setSelectedFeedback(
+                              parseFeedbackBlocks(
+                                submission['Coach\'s Feedback'] || '',
+                                submission['Interview Prompt'],
+                                submission['🤖✍️ Date Reviewed'] ? new Date(submission['🤖✍️ Date Reviewed']).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : (submission['Submission Time'] ? new Date(submission['Submission Time']).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : '')
+                              )
+                            );
+                            setSelectedSubmission(submission)
                             setIsFeedbackModalOpen(true);
                           }}
                         >
                           <FileText />
                           View Feedback
                         </Button>
+                        {submission['Proficiency score Numeric'] &&
+                          <div>
+                            Score: {submission['Proficiency score Numeric']}
+                          </div>
+                        }
+                        <div>
+                          {submission['Interview Type']}
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -252,7 +442,8 @@ export default function HistoryPage() {
       <FeedbackModal
         isOpen={isFeedbackModalOpen}
         onClose={() => setIsFeedbackModalOpen(false)}
-        feedback={selectedFeedback}
+        feedback={selectedFeedback as any}
+        selectedSubmission={selectedSubmission}
       />
     </main>
   );

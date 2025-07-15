@@ -205,7 +205,7 @@ export default function VideoReview() {
     try {
       const result = await uploadRecordingToBothServices(
         recordedData.videoBlob,
-        { ...formData, ...recordedData },
+        { ...formData, ...recordedData, duration: recordedData.duration / 60 },
         isInCsmList,
         csmName,
         setUploadProgress,

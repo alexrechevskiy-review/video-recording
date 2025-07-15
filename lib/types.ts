@@ -40,7 +40,14 @@ export type SubmissionRecord = {
   'Submission link': string | null;
   'Coach\'s Feedback': string;
   'Len of Video (min)': string;
-  createdTime: string;
+  'Interview Prompt': string;
+  'Type of Submission': string;
+  'Submission Time': string;
+  'Proficiency score Numeric': number;
+  'Interview Type': string;
+  '🤖✍️ Date Reviewed': Date;
+  'Feedback Report Google Doc (Sharable)': string;
+  'Proficiency Score (Hire Rubric)': string;
 };
 
 export type SubmissionHistoryResponse = {
