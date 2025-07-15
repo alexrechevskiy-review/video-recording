@@ -224,9 +224,6 @@ export default function HistoryPage() {
     }
   }, [formData?.email]);
 
-  const handleBack = () => {
-    router.push("/");
-  };
 
   // Clear all data when entering history page
   useEffect(() => {
@@ -239,29 +236,6 @@ export default function HistoryPage() {
 
   return (
     <main className="container mx-auto p-6 max-w-7xl">
-      {/* <div className="mb-8 w-full flex flex-col md:flex-row items-center justify-between gap-4">
-        <h1 className="text-3xl font-bold tracking-tight mb-2">Video Submission Portal</h1>
-        <Button
-          onClick={handleBack}
-          variant="outline"
-          className="md:block hidden"
-        >
-          Record another video
-        </Button>
-      </div> */}
-      {/* <div className="text-center mb-4">
-        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-100 mb-4">
-          <Check className="w-6 h-6 text-green-600" />
-        </div>
-        <h3 className="text-xl font-medium mb-2">Submission Complete!</h3>
-        <p className="text-gray-600 mb-4">Your video has been uploaded successfully and will be reviewed soon.</p>
-        <Button
-          onClick={handleBack}
-          variant="secondary"
-        >
-          Record another video
-        </Button>
-      </div> */}
       {/* Search Form */}
       {!formData?.email &&
         <Card className="my-8">

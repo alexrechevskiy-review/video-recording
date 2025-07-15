@@ -177,7 +177,7 @@ export default function VideoReview() {
     setIsNavigatingToHistory(true);
 
     // Navigate first, then clear data after a short delay
-    router.push("/history");
+    router.push("/thanks");
 
     // Clear data after navigation has started
     setTimeout(() => {
