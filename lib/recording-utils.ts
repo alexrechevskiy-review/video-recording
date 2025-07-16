@@ -443,8 +443,9 @@ export function createCombinedStream(
  * Creates a MediaRecorder instance for recording with optimized settings
  */
 export function createRecorder(stream: MediaStream): MediaRecorder {
-  const options = {
-    mimeType: 'video/webm;codecs=vp8,opus',
+  const mimeType = getSupportedMimeType();
+  const options: MediaRecorderOptions = {
+    mimeType,
     videoBitsPerSecond: 2500000,
     audioBitsPerSecond: 128000
   };
@@ -493,7 +494,8 @@ export async function uploadRecordingToGoogleDrive(
   csmName: string,
   onProgress?: (progress: { loaded: number; total: number; percentage: number }) => void,
   onError?: (error: string) => void,
-  isRetry: boolean = false
+  isRetry: boolean = false,
+  mimeType: string = 'video/webm'
 ): Promise<string> {
   // Create uploader instance if it doesn't exist
   if (!googleDriveUploader) {
@@ -501,7 +503,7 @@ export async function uploadRecordingToGoogleDrive(
   }
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-  const filename = `${timestamp}_${assessmentData.email}.webm`;
+  const filename = `${timestamp}_${assessmentData.email}.${mimeType.includes('mp4') ? 'mp4' : 'webm'}`;
 
   try {
     // Get current session for resume capability
@@ -518,7 +520,8 @@ export async function uploadRecordingToGoogleDrive(
       csmName,
       onProgress,
       onError,
-      shouldResume ? currentSession : undefined
+      shouldResume ? currentSession : undefined,
+      mimeType
     );
 
     return fileId;
@@ -551,6 +554,7 @@ export async function uploadRecordingToBothServices(
   csmName: string,
   onProgressUpdate?: (progress: UploadProgress) => void,
   isRetry: boolean = false,
+  mimeType: string = 'video/webm',
 ): Promise<{ webhookSuccess: boolean; googleDriveFileId?: string; errors: string[] }> {
   const errors: string[] = [];
   let webhookSuccess = false;
@@ -597,7 +601,8 @@ export async function uploadRecordingToBothServices(
           }
         });
       },
-      isRetry
+      isRetry,
+      mimeType
     );
 
     updateProgress({
@@ -752,4 +757,21 @@ export function stopAllMediaTracks() {
   } else {
     console.log('[stopAllMediaTracks] No global localStreams found');
   }
+}
+
+// Add this utility at the top (after imports)
+export function getSupportedMimeType(): string | undefined {
+  const possibleTypes = [
+    'video/webm;codecs=vp9,opus',
+    'video/webm;codecs=vp8,opus',
+    'video/webm',
+    'video/mp4;codecs=avc1.42E01E,mp4a.40.2',
+    'video/mp4'
+  ];
+  for (const type of possibleTypes) {
+    if (typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported(type)) {
+      return type;
+    }
+  }
+  return undefined;
 }

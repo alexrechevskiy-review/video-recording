@@ -30,6 +30,7 @@ export type RecordingSettings = {
 export type RecordedData = {
   videoBlob?: Blob;
   duration: number;
+  mimeType: string;
 };
 
 // Add new types for submission history

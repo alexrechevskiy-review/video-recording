@@ -311,6 +311,10 @@ export default function VideoReview() {
   const hasFailedUploads = uploadProgress.webhook?.status === 'failed' || uploadProgress.googleDrive?.status === 'failed';
   const hasAnySuccess = uploadProgress.webhook?.status === 'completed' || uploadProgress.googleDrive?.status === 'completed';
 
+  // When creating the video URL and download link, use the correct extension and type
+  const url = recordedData?.videoBlob ? URL.createObjectURL(recordedData.videoBlob) : undefined;
+  const extension = recordedData?.mimeType?.includes('mp4') ? 'mp4' : 'webm';
+
   return (
     <div className="w-full h-full flex flex-col">
       {/* Header */}
@@ -403,7 +407,12 @@ export default function VideoReview() {
                   ? { width: '100%', height: '100%', objectFit: 'contain', opacity: isVideoLoading ? 0.3 : 1 }
                   : { width: '100%', height: '100%', objectFit: 'contain', opacity: isVideoLoading ? 0.3 : 1 }
             }
-          />
+          >
+            {url && (
+              <source src={url} type={recordedData?.mimeType || 'video/webm'} />
+            )}
+            Your browser does not support the video tag.
+          </video>
         </div>
 
         {/* Video info - Fixed height */}
@@ -467,7 +476,7 @@ export default function VideoReview() {
                 const url = URL.createObjectURL(recordedData.videoBlob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'recording.webm';
+                a.download = `recording.${extension}`;
                 document.body.appendChild(a);
                 a.click();
                 setTimeout(() => {
@@ -517,13 +526,9 @@ export default function VideoReview() {
                       <div className="text-sm text-gray-600">
                         Upload failed. Please download your video and share it manually if you cannot retry.
                       </div>
-                      <Button
-                        onClick={handleDownload}
-                        size="sm"
-                        className="flex items-center gap-2"
-                      >
-                        Download Video
-                      </Button>
+                      {url && (
+                        <a href={url} download={`recording.${extension}`}>Download Video</a>
+                      )}
                     </div>
                   )}
                 </>

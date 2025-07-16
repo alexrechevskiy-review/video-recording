@@ -11,6 +11,7 @@ export async function PUT(request: NextRequest) {
         const start = searchParams.get('start');
         const end = searchParams.get('end');
         const total = searchParams.get('total');
+        const mimeType = searchParams.get('mimeType') || 'video/webm';
 
         if (!sessionUri || !start || !end || !total) {
             return NextResponse.json(
@@ -29,7 +30,7 @@ export async function PUT(request: NextRequest) {
             method: 'PUT',
             headers: {
                 'Content-Range': `bytes ${start}-${end}/${total}`,
-                'Content-Type': 'video/webm',
+                'Content-Type': mimeType,
             },
             body: chunk,
         });

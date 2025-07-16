@@ -41,7 +41,8 @@ export class GoogleDriveUploader {
         csmName: string,
         onProgress?: (progress: UploadProgress) => void,
         onError?: (error: string) => void,
-        resumeSession?: UploadSession
+        resumeSession?: UploadSession,
+        mimeType: string = 'video/webm'
     ): Promise<string> {
         try {
             // Use existing session or create new one
@@ -63,7 +64,8 @@ export class GoogleDriveUploader {
                         videoBlob.size,
                         userEmail,
                         isInCsmList,
-                        csmName
+                        csmName,
+                        mimeType
                     );
 
                     this.currentSession = {
@@ -86,7 +88,8 @@ export class GoogleDriveUploader {
                     videoBlob.size,
                     userEmail,
                     isInCsmList,
-                    csmName
+                    csmName,
+                    mimeType
                 );
 
                 this.currentSession = {
@@ -101,7 +104,8 @@ export class GoogleDriveUploader {
             const fileId = await this.uploadInChunks(
                 videoBlob,
                 onProgress,
-                onError
+                onError,
+                mimeType
             );
 
             // Clear session on success
@@ -181,7 +185,8 @@ export class GoogleDriveUploader {
         fileSize: number,
         userEmail: string,
         isInCsmList: boolean,
-        csmName: string
+        csmName: string,
+        mimeType: string = 'video/webm'
     ): Promise<{ sessionUri: string; uploadId: string }> {
         const response = await fetch('/api/google-drive/initiate', {
             method: 'POST',
@@ -190,7 +195,7 @@ export class GoogleDriveUploader {
             },
             body: JSON.stringify({
                 fileName: filename,
-                mimeType: 'video/webm',
+                mimeType: mimeType,
                 fileSize: fileSize,
                 userEmail: userEmail,
                 isInCsmList: isInCsmList,
@@ -218,7 +223,8 @@ export class GoogleDriveUploader {
     private async uploadInChunks(
         videoBlob: Blob,
         onProgress?: (progress: UploadProgress) => void,
-        onError?: (error: string) => void
+        onError?: (error: string) => void,
+        mimeType: string = 'video/webm'
     ): Promise<string> {
         if (!this.currentSession) {
             throw new Error('No upload session available');
@@ -238,7 +244,7 @@ export class GoogleDriveUploader {
 
             while (!chunkUploaded && retryCount < this.MAX_RETRIES) {
                 try {
-                    const result = await this.uploadChunk(sessionUri, chunk, chunkStart, chunkEnd, totalSize);
+                    const result = await this.uploadChunk(sessionUri, chunk, chunkStart, chunkEnd, totalSize, mimeType);
 
                     if (result.success) {
                         if (result.complete && result.fileId) {
@@ -316,7 +322,8 @@ export class GoogleDriveUploader {
         chunk: Blob,
         start: number,
         end: number,
-        total: number
+        total: number,
+        mimeType: string = 'video/webm'
     ): Promise<ChunkUploadResult> {
         try {
             const params = new URLSearchParams({
@@ -324,6 +331,7 @@ export class GoogleDriveUploader {
                 start: start.toString(),
                 end: end.toString(),
                 total: total.toString(),
+                mimeType: mimeType
             });
 
             const response = await fetch(`/api/google-drive/upload-chunk?${params}`, {

@@ -353,8 +353,9 @@ export default function VideoRecorder() {
       };
 
       recorder.onstop = () => {
+        const mimeType = mediaRecorderRef.current?.mimeType || "video/webm";
         const recordedBlob = new Blob(recordedChunksRef.current, {
-          type: "video/webm",
+          type: mimeType,
         });
 
         // Calculate the duration based on start time
@@ -366,6 +367,7 @@ export default function VideoRecorder() {
         setRecordedData({
           videoBlob: recordedBlob,
           duration,
+          mimeType,
         });
 
         router.push("/review");
