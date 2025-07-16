@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroupCards } from "@/components/ui/radio-group-cards";
 import { MultiSelect } from "../ui/multi-select";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "../ui/select";
+import { Sub } from "@radix-ui/react-navigation-menu";
 
 const formSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -34,7 +35,7 @@ export default function AssessmentForm() {
   const router = useRouter();
   const { formData: formValues, setFormData } = useRecording();
   const [coaches, setCoaches] = React.useState<Coach[]>([]);
-  console.log(formValues);
+
   const {
     register,
     handleSubmit,
@@ -49,7 +50,7 @@ export default function AssessmentForm() {
       coachToReview: 'recLQ0koHrbQLbnXp',
     },
   });
-
+  
 
   useEffect(() => {
     retrieveCoach();
@@ -70,6 +71,55 @@ export default function AssessmentForm() {
   const assessmentType = watch("assessmentType");
   const submissionType = watch("submissionType");
   const coachToReview = watch("coachToReview");
+  const prompt = watch("prompt");
+  const [customPrompt, setCustomPrompt] = React.useState("");
+  const [selectedPromptOption, setSelectedPromptOption] = React.useState<string>("");
+
+  // Keep prompt in sync with customPrompt if 'Other' is selected
+  useEffect(() => {
+    if (
+      (assessmentType === AssessmentType.BEHAVIORAL && selectedPromptOption === "Other") ||
+      (assessmentType === AssessmentType.PRODUCT_DESIGN && selectedPromptOption === "Other") ||
+      (assessmentType === AssessmentType.ANALYTICAL && selectedPromptOption === "Other") ||
+      (assessmentType === AssessmentType.STRATEGY && selectedPromptOption === "Other")
+    ) {
+      setValue("prompt", customPrompt);
+    }
+  }, [customPrompt, assessmentType, selectedPromptOption, setValue]);
+
+  // Reset customPrompt when assessmentType changes
+  useEffect(() => {
+    setCustomPrompt("");
+    if (
+      assessmentType === AssessmentType.BEHAVIORAL ||
+      assessmentType === AssessmentType.PRODUCT_DESIGN ||
+      assessmentType === AssessmentType.ANALYTICAL ||
+      assessmentType === AssessmentType.STRATEGY
+    ) {
+      const firstOption = promptOptions[assessmentType]?.[0];
+      if (firstOption) {
+        setSelectedPromptOption(firstOption.value);
+        if (firstOption.value !== "Other") {
+          setValue("prompt", firstOption.value);
+        } else {
+          setValue("prompt", "");
+        }
+      } else {
+        setSelectedPromptOption("");
+        setValue("prompt", "");
+      }
+    } else {
+      setSelectedPromptOption("");
+      setValue("prompt", "");
+    }
+  }, [assessmentType, setValue]);
+
+
+  useEffect(() => {
+    if (submissionType !== SubmissionType.LOOM) {
+      setValue("coachToReview", "recLQ0koHrbQLbnXp");
+    }
+  }, [submissionType, setValue]);
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     console.log("Form submitted with data:", data);
@@ -99,6 +149,33 @@ export default function AssessmentForm() {
     }
   };
 
+  // Prompt options for each assessment type
+  const promptOptions = {
+    [AssessmentType.BEHAVIORAL]: [
+      { value: "Other", label: "Other (User enter’s their own prompt)" },
+    ],
+    [AssessmentType.PRODUCT_DESIGN]: [
+      { value: "Design Uber for people 65 and older.", label: "Design Uber for people 65 and older." },
+      { value: "Design an app to help people celebrate birthdays.", label: "Design an app to help people celebrate birthdays." },
+      { value: "Design an educational product at Meta.", label: "Design an educational product at Meta." },
+      { value: "Design a product for parking for Google Maps.", label: "Design a product for parking for Google Maps." },
+      { value: "Other", label: "Other (User enter’s their own prompt)" },
+    ],
+    [AssessmentType.ANALYTICAL]: [
+      { value: "Set goals and metrics for the Netflix homepage.", label: "Set goals and metrics for the Netflix homepage." },
+      { value: "(Trade-offs) How would you decide between launching a highly requested feature vs. addressing a critical bug?", label: "(Trade-offs) How would you decide between launching a highly requested feature vs. addressing a critical bug?" },
+      { value: "(RCA) You are PM at Google News. Usage is down 10%. What would you do?", label: "(RCA) You are PM at Google News. Usage is down 10%. What would you do?" },
+      { value: "Set goals and metrics for FB Dating.", label: "Set goals and metrics for FB Dating." },
+      { value: "Set goals and metrics for Zoom.", label: "Set goals and metrics for Zoom." },
+      { value: "Other", label: "Other (User enter’s their own prompt)" },
+    ],
+    [AssessmentType.STRATEGY]: [
+      { value: "How would you set up AirBnB for success over the next 5 years?", label: "How would you set up AirBnB for success over the next 5 years?" },
+      { value: "Should Netflix create a podcast product?", label: "Should Netflix create a podcast product?" },
+      { value: "How can Apple Maps regain market share?", label: "How can Apple Maps regain market share?" },
+      { value: "Other", label: "Other (User enter’s their own prompt)" },
+    ],
+  };
   return (
     <div className="w-full max-w-3xl mx-auto p-2 md:p-8">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
@@ -115,22 +192,6 @@ export default function AssessmentForm() {
           />
           {errors.email && (
             <p className="text-destructive text-sm mt-1">{errors.email.message}</p>
-          )}
-        </div>
-
-        <div className="space-y-3">
-          <Label htmlFor="prompt" className="text-base">
-            Interview Prompt: What is your submission responding to? <span className="text-destructive">*</span>
-          </Label>
-          <p className="text-muted-foreground text-sm">eg &quot;Tell me about yourself&quot; or &quot;Design Uber for people 65 and older&quot;</p>
-          <Textarea
-            id="prompt"
-            {...register("prompt")}
-            placeholder="Enter your interview prompt"
-            className="w-full min-h-[120px]"
-          />
-          {errors.prompt && (
-            <p className="text-destructive text-sm mt-1">{errors.prompt.message}</p>
           )}
         </div>
 
@@ -155,6 +216,68 @@ export default function AssessmentForm() {
           )}
         </div>
 
+
+        <div className="space-y-3">
+          <Label htmlFor="prompt" className="text-base">
+            Interview Prompt: What is your submission responding to? <span className="text-destructive">*</span>
+          </Label>
+          <p className="text-muted-foreground text-sm">eg &quot;Tell me about yourself&quot; or &quot;Design Uber for people 65 and older&quot;</p>
+
+          {/* Dynamic prompt field rendering */}
+          {assessmentType === AssessmentType.CASE_STUDY ? (
+            <Input
+              id="prompt"
+              {...register("prompt")}
+              placeholder="Enter your interview prompt"
+              className="w-full"
+              maxLength={120}
+            />
+          ) : promptOptions[assessmentType] ? (
+            <>
+              <Select
+                value={selectedPromptOption}
+                onValueChange={value => {
+                  setSelectedPromptOption(value);
+                  if (value !== "Other") {
+                    setValue("prompt", value);
+                    setCustomPrompt("");
+                  } else {
+                    setCustomPrompt("");
+                    setValue("prompt", "");
+                  }
+                }}
+                name="promptDropdown"
+              >
+                <SelectTrigger className="min-h-[44px] w-full">
+                  <SelectValue placeholder="Select a prompt" />
+                </SelectTrigger>
+                <SelectContent>
+                  {promptOptions[assessmentType].map(opt => (
+                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {selectedPromptOption === "Other" && (
+                <Textarea
+                  id="prompt"
+                  value={customPrompt}
+                  onChange={e => {
+                    setCustomPrompt(e.target.value);
+                    setValue("prompt", e.target.value);
+                  }}
+                  placeholder="Enter your interview prompt"
+                  className="w-full mt-2 min-h-[80px]"
+                  maxLength={300}
+                />
+              )}
+            </>
+          ) : null}
+
+          {errors.prompt && (
+            <p className="text-destructive text-sm mt-1">{errors.prompt.message}</p>
+          )}
+        </div>
+
         <div className="space-y-4">
           <Label className="text-base">
             Type of Submission <span className="text-destructive">*</span>
@@ -172,35 +295,37 @@ export default function AssessmentForm() {
             <p className="text-destructive text-sm">{errors.submissionType.message}</p>
           )}
         </div>
+        {
+          submissionType == SubmissionType.LOOM &&
+          <div className="space-y-3">
+            <Label className="text-base">
+              Coach/Masterclass Host <span className="text-destructive">*</span>
+            </Label>
+            <p className="text-muted-foreground text-sm">
+              Add the name of the Coach who hosted the session, otherwise default to Serges
+            </p>
 
-        <div className="space-y-3">
-          <Label className="text-base">
-            Coach/Masterclass Host <span className="text-destructive">*</span>
-          </Label>
-          <p className="text-muted-foreground text-sm">
-            Add the name of the Coach who hosted the session, otherwise default to Serges
-          </p>
-
-          <Select
-            value={coachToReview}
-            onValueChange={(value) => setValue("coachToReview", value)}
-            name="coachToReview"
-          >
-            <SelectTrigger className="min-h-[44px] w-full">
-              <SelectValue placeholder="Select a coach" />
-            </SelectTrigger>
-            <SelectContent>
-              {coaches.map(coach => (
-                <SelectItem key={coach.Record_ID} value={coach.Record_ID}>
-                  {coach.Name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {errors.coachToReview && (
-            <p className="text-destructive text-sm">{errors.coachToReview.message}</p>
-          )}
-        </div>
+            <Select
+              value={coachToReview}
+              onValueChange={(value) => setValue("coachToReview", value)}
+              name="coachToReview"
+            >
+              <SelectTrigger className="min-h-[44px] w-full">
+                <SelectValue placeholder="Select a coach" />
+              </SelectTrigger>
+              <SelectContent>
+                {coaches.map(coach => (
+                  <SelectItem key={coach.Record_ID} value={coach.Record_ID}>
+                    {coach.Name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.coachToReview && (
+              <p className="text-destructive text-sm">{errors.coachToReview.message}</p>
+            )}
+          </div>
+        }
 
         <div className="space-y-3">
           <Label htmlFor="notes" className="text-base">

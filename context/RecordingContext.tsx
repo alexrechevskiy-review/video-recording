@@ -53,7 +53,7 @@ export const RecordingProvider: React.FC<{ children: React.ReactNode }> = ({
     });
     setRecordedData(null);
   };
-
+  console.log(formData);
   const value = {
     formData,
     setFormData,
