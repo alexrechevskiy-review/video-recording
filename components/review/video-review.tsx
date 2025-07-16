@@ -60,7 +60,7 @@ export default function VideoReview() {
           (e: { '✍️ Email': string; '🚫 Full Name': string }) => e['✍️ Email'] == formData.email
         );
         setIsInCsmList(result.length > 0);
-        if(result.length > 0) {
+        if (result.length > 0) {
           console.log(result);
           setCsmName(result[0]['🚫 Full Name'])
         }
@@ -398,7 +398,7 @@ export default function VideoReview() {
             className="object-contain"
             style={
               isInIframe && !isMobile
-              ? { height: '400px' , width: '640px'}
+                ? { height: '400px', width: '640px' }
                 : isMobile
                   ? { width: '100%', height: '100%', objectFit: 'contain', opacity: isVideoLoading ? 0.3 : 1 }
                   : { width: '100%', height: '100%', objectFit: 'contain', opacity: isVideoLoading ? 0.3 : 1 }
@@ -422,8 +422,6 @@ export default function VideoReview() {
             "mb-6 p-4 bg-gray-50 rounded-lg border",
             isMobile ? "flex-shrink-0 max-h-48 overflow-y-auto" : "flex-shrink-0"
           )}>
-            <h3 className="text-sm font-medium mb-4">Submission Progress</h3>
-
             {/* Combined Progress Status */}
             {(() => {
               // Calculate combined progress and status
@@ -463,9 +461,25 @@ export default function VideoReview() {
               // Show icon based on combined status
               const icon = getUploadStatusIcon(combinedStatus);
 
+              // Download handler for failed uploads
+              const handleDownload = () => {
+                if (!recordedData?.videoBlob) return;
+                const url = URL.createObjectURL(recordedData.videoBlob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'recording.webm';
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => {
+                  document.body.removeChild(a);
+                  URL.revokeObjectURL(url);
+                }, 100);
+              };
+
               return (
                 <>
-                  <div className="flex items-center justify-between mb-3">
+                  {/* Status Row */}
+                  <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       {icon}
                       <span className="text-sm">Overall Submission</span>
@@ -474,18 +488,20 @@ export default function VideoReview() {
                       {statusText}
                     </span>
                   </div>
-                  {/* Progress Bar */}
+                  {/* Progress Bar Row */}
                   {(combinedStatus === 'uploading' || combinedStatus === 'pending') && (
-                    <div className="mt-2 mb-4">
+                    <div className="mb-2">
                       <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                         <div
                           style={{ width: `${combinedProgress}%` }}
                           className="h-full bg-primary transition-all"
                         />
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {statusText}
-                      </p>
+                      {combinedStatus === 'uploading' && (
+                        <p className="text-xs text-gray-500 mt-1">
+                          {combinedProgress > 0 ? `${Math.round(combinedProgress)}%` : ''}
+                        </p>
+                      )}
                     </div>
                   )}
                   {/* Error Messages */}
@@ -495,26 +511,19 @@ export default function VideoReview() {
                       {wh?.error && <div>Form: {wh.error}</div>}
                     </div>
                   )}
-                  {/* Retry Button */}
+                  {/* Download Reminder and Retry Button on Failure */}
                   {showRetryButton && !isSubmitting && (
-                    <div className="mt-4 pt-3 border-t border-gray-200">
-                      <div className="flex items-center justify-between">
-                        <div className="text-sm text-gray-600">
-                          {gd?.canResume
-                            ? `Upload failed. Can resume from ${gd.progress || 0}%`
-                            : 'Submission failed'
-                          }
-                        </div>
-                        <Button
-                          onClick={handleRetry}
-                          variant="outline"
-                          size="sm"
-                          className="flex items-center gap-2"
-                        >
-                          <RefreshCw className="h-4 w-4" />
-                          {gd?.canResume ? 'Resume Submission' : 'Retry Submission'}
-                        </Button>
+                    <div className="mt-4 pt-3 border-t border-gray-200 flex flex-col gap-3 items-center">
+                      <div className="text-sm text-gray-600">
+                        Upload failed. Please download your video and share it manually if you cannot retry.
                       </div>
+                      <Button
+                        onClick={handleDownload}
+                        size="sm"
+                        className="flex items-center gap-2"
+                      >
+                        Download Video
+                      </Button>
                     </div>
                   )}
                 </>
