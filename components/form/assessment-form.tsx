@@ -296,7 +296,7 @@ export default function AssessmentForm() {
           )}
         </div>
         {
-          submissionType == SubmissionType.LOOM &&
+          submissionType != SubmissionType.LOOM &&
           <div className="space-y-3">
             <Label className="text-base">
               Coach/Masterclass Host <span className="text-destructive">*</span>
