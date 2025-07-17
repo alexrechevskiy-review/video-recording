@@ -116,7 +116,7 @@ export default function AssessmentForm() {
 
 
   useEffect(() => {
-    if (submissionType !== SubmissionType.LOOM) {
+    if (submissionType == SubmissionType.LOOM) {
       setValue("coachToReview", "recLQ0koHrbQLbnXp");
     }
   }, [submissionType, setValue]);
