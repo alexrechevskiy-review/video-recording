@@ -335,7 +335,7 @@ export default function VideoReview() {
 
       {/* Main content */}
       <div className={cn(
-        "flex-1 flex flex-col container m-auto py-6 overflow-hidden",
+        "flex-1 flex flex-col container m-auto py-4 overflow-hidden",
         isMobile ? "px-4 max-w-full" : "max-w-5xl"
       )}>
         {/* CSM Loading Indicator */}
