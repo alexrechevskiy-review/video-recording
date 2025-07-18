@@ -511,15 +511,34 @@ export default function VideoReview() {
                     </div>
                   )}
                   {showRetryButton && !isSubmitting && (
-                    <div className="md:flex hidden md:mx-auto mx-2 md:max-w-xs max-w-none pt-3 border-gray-200 flex-col gap-3 items-center">
+                    <div className="md:flex hidden md:mx-auto mx-2 md:max-w-xs max-w-none pt-3 border-gray-200 gap-3 items-center justify-center">
                       {url && (
-                        <div className="flex justify-center items-center gap-3">
+                        <Button size="lg" variant='outline' className="flex justify-center items-center gap-3">
                           <Download className="w-5 h-5" />
                           <a href={url} download={`recording.${extension}`} className="flex justify-center items-center gap-3">
                             Download Video
                           </a>
-                        </div>
+                        </Button>
                       )}
+                      <Button
+                        size="lg"
+                        onClick={handleRetry}
+                        disabled={isSubmitting || isGettingCsmList}
+                        className="md:w-auto w-full"
+                        variant="default"
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                            <span>Retrying...</span>
+                          </>
+                        ) : (
+                          <>
+                            <RefreshCw className="mr-2 h-5 w-5" />
+                            Retry Submission
+                          </>
+                        )}
+                      </Button>
                     </div>
                   )}
                 </>
@@ -541,17 +560,7 @@ export default function VideoReview() {
           </Button>
         )}
         {/* Submit button - Fixed at bottom */}
-        <div className="flex justify-between gap-4 md:p-0">
-          <Button
-            variant="outline"
-            size="lg"
-            onClick={handleBack}
-            className="md:block hidden"
-            disabled={isSubmitting || isGettingCsmList}
-          >
-            Back to Recording
-          </Button>
-
+        <div className="flex justify-end gap-4 md:p-0">
           {!submissionComplete ? (
             !showRetryButton ? (
               <Button
@@ -577,7 +586,7 @@ export default function VideoReview() {
                 size="lg"
                 onClick={handleRetry}
                 disabled={isSubmitting || isGettingCsmList}
-                className="px-8 md:w-auto w-full"
+                className="px-8 md:w-auto w-full md:hidden flex"
                 variant="default"
               >
                 {isSubmitting ? (
