@@ -16,11 +16,10 @@ const calculateMobileVideoHeight = () => {
   const viewportHeight = window.innerHeight;
   const headerHeight = 73; // Header with padding
   const videoInfoHeight = 40; // Video info section
-  const progressHeight = 200; // Upload progress when visible
-  const buttonsHeight = 120; // Submit buttons
-  const padding = 48; // Container padding
+  const progressHeight = 100; // Upload progress when visible
+  const buttonsHeight = 60; // Submit buttons
 
-  const availableHeight = viewportHeight - headerHeight - videoInfoHeight - buttonsHeight - padding;
+  const availableHeight = viewportHeight - headerHeight - videoInfoHeight - buttonsHeight - progressHeight;
   return `${Math.max(availableHeight, 300)}px`; // Minimum 300px
 };
 
@@ -349,7 +348,7 @@ export default function VideoReview() {
         )}
         {/* Video player with loading overlay - Height constrained on mobile */}
         <div className={cn(
-          "relative bg-black rounded-xl overflow-hidden mb-6 flex-shrink-0 flex justify-center",
+          "relative bg-black rounded-xl overflow-hidden md:mb-6 mb-3 flex-shrink-0 flex justify-center",
           isMobile ? "w-full" : "flex-1"
         )}
           style={
@@ -417,7 +416,7 @@ export default function VideoReview() {
 
         {/* Video info - Fixed height */}
         {!isVideoLoading && !videoLoadError && (
-          <div className="mb-6 flex-shrink-0">
+          <div className="md:mb-6 mb-2 flex-shrink-0">
             <p className="text-sm text-muted-foreground">
               {recordedData.videoBlob.size ? `${(recordedData.videoBlob.size / (1024 * 1024)).toFixed(2)} MB` : ""}
               {recordedData.duration ? ` • ${formatTime(recordedData.duration)}` : ""}
@@ -428,7 +427,7 @@ export default function VideoReview() {
         {/* Upload Progress - Scrollable if needed on mobile */}
         {(isSubmitting || hasFailedUploads || hasAnySuccess) && (
           <div className={cn(
-            "mb-6 p-4 bg-gray-50 rounded-lg border",
+            "md:mb-6 mb-3 md:p-4 p-2 bg-gray-50 rounded-lg border",
             isMobile ? "flex-shrink-0 max-h-48 overflow-y-auto" : "flex-shrink-0"
           )}>
             {/* Combined Progress Status */}
@@ -488,15 +487,13 @@ export default function VideoReview() {
               return (
                 <>
                   {/* Status Row */}
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
+                    {/* <div className="flex items-center gap-2">
                       {icon}
                       <span className="text-sm">Overall Submission</span>
-                    </div>
+                    </div> */}
                     <span className="text-xs text-gray-500">
                       {statusText}
                     </span>
-                  </div>
                   {/* Progress Bar Row */}
                   {(combinedStatus === 'uploading' || combinedStatus === 'pending') && (
                     <div className="mb-2">
@@ -521,10 +518,10 @@ export default function VideoReview() {
                     </div>
                   )}
                   {showRetryButton && !isSubmitting && (
-                    <div className="md:flex hidden md:mx-auto mx-2 md:max-w-xs max-w-none my-4 pt-3 border-gray-200 flex-col gap-3 items-center">
+                    <div className="md:flex hidden md:mx-auto mx-2 md:max-w-xs max-w-none pt-3 border-gray-200 flex-col gap-3 items-center">
                       {url && (
                         <div className="flex justify-center items-center gap-3">
-                          <Download />
+                          <Download className="w-5 h-5"/>
                           <a href={url} download={`recording.${extension}`}  className="flex justify-center items-center gap-3">
                             Download Video
                           </a>
@@ -539,7 +536,7 @@ export default function VideoReview() {
         )}
         {/* Download Reminder and Retry Button on Failure */}
         {showRetryButton && !isSubmitting && (
-          <Button variant='outline' className="md:hidden md:mx-auto mx-2 md:max-w-xs max-w-none my-4 pt-3 border-gray-200 flex flex-col gap-3 items-center">
+          <Button variant='outline' className="md:hidden md:mx-auto mx-2 md:max-w-xs max-w-none t-3 border-gray-200 flex flex-col gap-3 items-center">
             {url && (
               <div className="flex justify-center items-center gap-3">
                 <Download />
@@ -551,11 +548,12 @@ export default function VideoReview() {
           </Button>
         )}
         {/* Submit button - Fixed at bottom */}
-        <div className="flex md:flex-row flex-col justify-between gap-4 p-2 md:p-0 flex-shrink-0">
+        <div className="flex justify-between gap-4 p-2 md:p-0">
           <Button
             variant="outline"
             size="lg"
             onClick={handleBack}
+            className="md:block hidden"
             disabled={isSubmitting || isGettingCsmList}
           >
             Back to Recording
@@ -567,7 +565,7 @@ export default function VideoReview() {
                 size="lg"
                 onClick={handleSubmit}
                 disabled={isSubmitting || isVideoLoading || Boolean(videoLoadError) || isGettingCsmList}
-                className="px-8"
+                className="px-8 md:w-auto w-full"
               >
                 {isSubmitting ? (
                   <>
@@ -586,7 +584,7 @@ export default function VideoReview() {
                 size="lg"
                 onClick={handleRetry}
                 disabled={isSubmitting || isGettingCsmList}
-                className="px-8"
+                className="px-8 md:w-auto w-full"
                 variant="default"
               >
                 {isSubmitting ? (
