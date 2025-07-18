@@ -316,8 +316,8 @@ export default function VideoReview() {
   return (
     <div className="w-full h-full flex flex-col">
       {/* Header */}
-      <div className="md:p-4 p-0 border-b flex-shrink-0">
-        <div className="container flex items-center justify-between">
+      <div className="md:p-4 p-0 border-b">
+        <div className="w-full flex items-center justify-between">
           <Button
             variant="ghost"
             size="icon"
@@ -328,8 +328,12 @@ export default function VideoReview() {
           </Button>
 
           <h1 className="text-lg font-medium">Review Your Recording</h1>
-
-          <div className="w-10" />
+          {/* Video info - Fixed height */}
+          {!isVideoLoading && !videoLoadError && (
+            <div className="mr-4">
+              {recordedData.duration ? `${formatTime(recordedData.duration)}` : ""}
+            </div>
+          )}
         </div>
       </div>
 
@@ -476,13 +480,13 @@ export default function VideoReview() {
               return (
                 <>
                   {/* Status Row */}
-                    {/* <div className="flex items-center gap-2">
+                  {/* <div className="flex items-center gap-2">
                       {icon}
                       <span className="text-sm">Overall Submission</span>
                     </div> */}
-                    <span className="text-xs text-gray-500">
-                      {statusText}
-                    </span>
+                  <span className="text-xs text-gray-500">
+                    {statusText}
+                  </span>
                   {/* Progress Bar Row */}
                   {(combinedStatus === 'uploading' || combinedStatus === 'pending') && (
                     <div className="mb-2">
@@ -510,8 +514,8 @@ export default function VideoReview() {
                     <div className="md:flex hidden md:mx-auto mx-2 md:max-w-xs max-w-none pt-3 border-gray-200 flex-col gap-3 items-center">
                       {url && (
                         <div className="flex justify-center items-center gap-3">
-                          <Download className="w-5 h-5"/>
-                          <a href={url} download={`recording.${extension}`}  className="flex justify-center items-center gap-3">
+                          <Download className="w-5 h-5" />
+                          <a href={url} download={`recording.${extension}`} className="flex justify-center items-center gap-3">
                             Download Video
                           </a>
                         </div>
