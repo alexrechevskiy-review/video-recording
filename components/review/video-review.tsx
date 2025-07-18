@@ -15,11 +15,10 @@ const calculateMobileVideoHeight = () => {
   // Calculate available height for video on mobile
   const viewportHeight = window.innerHeight;
   const headerHeight = 73; // Header with padding
-  const videoInfoHeight = 40; // Video info section
   const progressHeight = 100; // Upload progress when visible
   const buttonsHeight = 60; // Submit buttons
 
-  const availableHeight = viewportHeight - headerHeight - videoInfoHeight - buttonsHeight - progressHeight;
+  const availableHeight = viewportHeight - headerHeight - buttonsHeight - progressHeight;
   return `${Math.max(availableHeight, 300)}px`; // Minimum 300px
 };
 
@@ -414,16 +413,6 @@ export default function VideoReview() {
           </video>
         </div>
 
-        {/* Video info - Fixed height */}
-        {!isVideoLoading && !videoLoadError && (
-          <div className="md:mb-6 mb-2 flex-shrink-0">
-            <p className="text-sm text-muted-foreground">
-              {recordedData.videoBlob.size ? `${(recordedData.videoBlob.size / (1024 * 1024)).toFixed(2)} MB` : ""}
-              {recordedData.duration ? ` • ${formatTime(recordedData.duration)}` : ""}
-            </p>
-          </div>
-        )}
-
         {/* Upload Progress - Scrollable if needed on mobile */}
         {(isSubmitting || hasFailedUploads || hasAnySuccess) && (
           <div className={cn(
@@ -536,7 +525,7 @@ export default function VideoReview() {
         )}
         {/* Download Reminder and Retry Button on Failure */}
         {showRetryButton && !isSubmitting && (
-          <Button variant='outline' className="md:hidden md:mx-auto mx-2 md:max-w-xs max-w-none t-3 border-gray-200 flex flex-col gap-3 items-center">
+          <Button variant='outline' className="md:hidden md:mx-auto mb-2 md:max-w-xs max-w-none t-3 border-gray-200 flex flex-col gap-3 items-center">
             {url && (
               <div className="flex justify-center items-center gap-3">
                 <Download />
@@ -548,7 +537,7 @@ export default function VideoReview() {
           </Button>
         )}
         {/* Submit button - Fixed at bottom */}
-        <div className="flex justify-between gap-4 p-2 md:p-0">
+        <div className="flex justify-between gap-4 md:p-0">
           <Button
             variant="outline"
             size="lg"
