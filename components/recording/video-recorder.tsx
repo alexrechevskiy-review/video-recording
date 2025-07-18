@@ -581,10 +581,33 @@ export default function VideoRecorder() {
               <Button
                 variant="outline"
                 size="sm"
-                className="bg-white/20 opacity-0 w-[88px] border-white/30 text-white hover:bg-white/30 backdrop-blur-sm"
+                className="bg-white/20 opacity-0 md:block hidden w-[88px] border-white/30 text-white hover:bg-white/30 backdrop-blur-sm"
               >
                 Back
               </Button>
+
+
+              <Button
+                  variant={settings.microphoneEnabled ? "default" : "outline"}
+                  size="icon"
+                  onClick={() => handleSettingsChange({
+                    ...settings,
+                    microphoneEnabled: !settings.microphoneEnabled,
+                  })}
+                  disabled={false}
+                  className={cn(
+                    "h-10 w-10 rounded-full",
+                    settings.microphoneEnabled
+                      ? "bg-white text-black hover:bg-white/90"
+                      : "bg-white/20 border-white/30 text-white hover:bg-white/30 backdrop-blur-sm"
+                  )}
+                >
+                  {settings.microphoneEnabled ? (
+                    <Mic className="h-4 w-4" />
+                  ) : (
+                    <MicOff className="h-4 w-4" />
+                  )}
+                </Button>
 
               {/* Center - Record button */}
               <div className="flex-1 flex justify-center">
@@ -637,27 +660,6 @@ export default function VideoRecorder() {
                   )}
                 </Button>
 
-                <Button
-                  variant={settings.microphoneEnabled ? "default" : "outline"}
-                  size="icon"
-                  onClick={() => handleSettingsChange({
-                    ...settings,
-                    microphoneEnabled: !settings.microphoneEnabled,
-                  })}
-                  disabled={false}
-                  className={cn(
-                    "h-10 w-10 rounded-full",
-                    settings.microphoneEnabled
-                      ? "bg-white text-black hover:bg-white/90"
-                      : "bg-white/20 border-white/30 text-white hover:bg-white/30 backdrop-blur-sm"
-                  )}
-                >
-                  {settings.microphoneEnabled ? (
-                    <Mic className="h-4 w-4" />
-                  ) : (
-                    <MicOff className="h-4 w-4" />
-                  )}
-                </Button>
               </div>
             </div>
           </div>
