@@ -2,7 +2,7 @@
 
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Send, Loader2, CheckCircle, AlertCircle, RefreshCw } from "lucide-react";
+import { ArrowLeft, Send, Loader2, CheckCircle, AlertCircle, RefreshCw, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRecording } from "@/context/RecordingContext";
 import { formatTime, uploadRecordingToBothServices, UploadProgress, clearGoogleDriveSession, stopAllMediaTracks } from "@/lib/recording-utils";
@@ -442,7 +442,7 @@ export default function VideoReview() {
 
               if (gd?.status === 'failed' || wh?.status === 'failed') {
                 combinedStatus = 'failed';
-                statusText = 'Submission Failed';
+                statusText = '';
               } else if (gd?.status === 'uploading') {
                 combinedStatus = 'uploading';
                 // Google Drive uploading: 0-50%
@@ -520,14 +520,15 @@ export default function VideoReview() {
                       {wh?.error && <div>Form: {wh.error}</div>}
                     </div>
                   )}
-                  {/* Download Reminder and Retry Button on Failure */}
                   {showRetryButton && !isSubmitting && (
-                    <div className="mt-4 pt-3 border-t border-gray-200 flex flex-col gap-3 items-center">
-                      <div className="text-sm text-gray-600">
-                        Upload failed. Please download your video and share it manually if you cannot retry.
-                      </div>
+                    <div className="md:flex hidden md:mx-auto mx-2 md:max-w-xs max-w-none my-4 pt-3 border-gray-200 flex-col gap-3 items-center">
                       {url && (
-                        <a href={url} download={`recording.${extension}`}>Download Video</a>
+                        <div className="flex justify-center items-center gap-3">
+                          <Download />
+                          <a href={url} download={`recording.${extension}`}  className="flex justify-center items-center gap-3">
+                            Download Video
+                          </a>
+                        </div>
                       )}
                     </div>
                   )}
@@ -536,9 +537,21 @@ export default function VideoReview() {
             })()}
           </div>
         )}
-
+        {/* Download Reminder and Retry Button on Failure */}
+        {showRetryButton && !isSubmitting && (
+          <Button variant='outline' className="md:hidden md:mx-auto mx-2 md:max-w-xs max-w-none my-4 pt-3 border-gray-200 flex flex-col gap-3 items-center">
+            {url && (
+              <div className="flex justify-center items-center gap-3">
+                <Download />
+                <a href={url} download={`recording.${extension}`}>
+                  Download Video
+                </a>
+              </div>
+            )}
+          </Button>
+        )}
         {/* Submit button - Fixed at bottom */}
-        <div className="flex md:flex-row flex-col justify-between gap-4 p-2 md:p-0 flex-shrink-0">
+        <div className="flex justify-between gap-4 p-2 md:p-0 flex-shrink-0">
           <Button
             variant="outline"
             size="lg"
