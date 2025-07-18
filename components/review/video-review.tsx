@@ -317,23 +317,25 @@ export default function VideoReview() {
     <div className="w-full h-full flex flex-col">
       {/* Header */}
       <div className="md:p-4 p-0 border-b">
-        <div className="w-full flex items-center justify-between">
+        <div className="w-full relative flex items-center justify-center">
           <Button
             variant="ghost"
             size="icon"
+            className="absolute left-0"
             onClick={handleBack}
             disabled={isSubmitting || isVideoLoading}
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-
-          <h1 className="text-lg font-medium">Review Your Recording</h1>
-          {/* Video info - Fixed height */}
-          {!isVideoLoading && !videoLoadError && (
-            <div className="mr-4">
-              {recordedData.duration ? `${formatTime(recordedData.duration)}` : ""}
-            </div>
-          )}
+          <div className="flex flex-col items-center">
+            <h1 className="text-lg font-medium">Review Your Recording</h1>
+            {/* Video info - Fixed height */}
+            {!isVideoLoading && !videoLoadError && (
+              <div className="">
+                {recordedData.duration ? `${formatTime(recordedData.duration)}` : ""}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

@@ -12,10 +12,10 @@ export default function FormPage() {
       <div className="w-full max-w-3xl">
         <div className="mb-8 text-center">
           <div className="container flex items-center justify-center">
-            <h1 className="text-3xl text-center font-bold tracking-tight mb-2">Submit Your Practice Video</h1>
+            <h1 className="text-3xl text-center font-bold tracking-tight mb-2">Your Practice Video</h1>
           </div>
           <p className="text-muted-foreground">
-            Complete the form below to submit your interview recording
+            Complete the steps below to submit your interview recording
           </p>
         </div>
 

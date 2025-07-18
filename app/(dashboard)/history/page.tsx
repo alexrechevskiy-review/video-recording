@@ -235,22 +235,22 @@ export default function HistoryPage() {
   }, []);
 
   return (
-    <main className="container mx-auto p-6 max-w-7xl">
+    <main className="container mx-auto p-2 sm:p-4 md:p-6 max-w-7xl">
       {/* Search Form */}
       {!formData?.email &&
-        <Card className="my-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+        <Card className="my-4 sm:my-8">
+          <CardHeader className="md:p-6 p-4">
+            <CardTitle className="flex flex-col sm:flex-row items-start sm:items-center gap-2 md:text-xl text-lg">
               <Search className="h-5 w-5" />
-              Your Previous Submissions
+              <span>Your Previous Submissions</span>
             </CardTitle>
             <CardDescription>
               Enter an email address to view submission history
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSearch} className="flex gap-4">
-              <div className="flex-1">
+          <CardContent className="md:p-6 p-4">
+            <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+              <div className="flex-1 w-full">
                 <Label htmlFor="email" className="sr-only">
                   Email Address
                 </Label>
@@ -263,7 +263,7 @@ export default function HistoryPage() {
                   className="w-full"
                 />
               </div>
-              <Button type="submit" disabled={isLoading}>
+              <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
                 {isLoading ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -287,7 +287,7 @@ export default function HistoryPage() {
       {/* Results */}
       {
         error && hasSearched && (
-          <Card className="mb-8">
+          <Card className="mb-4 sm:mb-8">
             <CardContent className="pt-6">
               <div className="text-center text-red-600">
                 <p className="font-medium">Error loading submissions</p>
@@ -310,18 +310,18 @@ export default function HistoryPage() {
       {
         data && hasSearched && (
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span className="flex items-center gap-2">
-                  <FileText className="h-5 w-5" />
-                  Submissions for {searchEmail}
-                </span>
-                <span className="text-sm font-normal text-muted-foreground">
+            <CardHeader className="md:p-6 p-4">
+              <CardTitle className="flex flex-col md:flex-row items-start md:items-center justify-between md:text-xl text-lg gap-2 md:gap-0">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-5 w-5 md:block hidden" />
+                  <span>Submissions for {searchEmail}</span>
+                </div>
+                <div className="text-sm font-normal text-muted-foreground">
                   {data.total || data.submissions?.length || 0} total submission{(data.total || data.submissions?.length || 0) !== 1 ? 's' : ''}
-                </span>
+                </div>
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="md:p-6 p-4">
               {!data.submissions || data.submissions.length === 0 ? (
                 <div className="text-center py-8">
                   <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -333,9 +333,9 @@ export default function HistoryPage() {
               ) : (
                 <div className="overflow-x-auto">
                   {data.submissions.map((submission, index) => (
-                    <div key={submission.id || index} className="p-4 flex justify-between items-center border rounded-lg bg-card text-card-foreground shadow-sm mt-4">
-                      <Link href={submission['Submission link'] ?? ''} target="_blank" className="flex gap-2 flex-col">
-                        <h4 className="font-medium">
+                    <div key={submission.id || index} className="p-3 sm:p-4 flex flex-col md:flex-row justify-between items-start md:items-center border rounded-lg bg-card text-card-foreground shadow-sm mt-4 gap-3 md:gap-0">
+                      <Link href={submission['Submission link'] ?? ''} target="_blank" className="flex gap-2 flex-col w-full md:w-auto">
+                        <h4 className="font-medium text-base sm:text-lg">
                           {submission['Interview Prompt']
                             ? submission['Interview Prompt'].length > 100
                               ? submission['Interview Prompt'].slice(0, 100) + ' ...'
@@ -345,85 +345,86 @@ export default function HistoryPage() {
                         <div className="text-sm text-gray-500">
                           {submission['Interview Type']}
                         </div>
-                        <div className="text-sm text-gray-500">
-                          <span>
-                            Submitted&nbsp;
-                            {(() => {
-                              const now = new Date();
-                              const created = new Date(submission['Submission Time']);
-                              const diffDays = differenceInDays(now, created);
-                              if (diffDays === 0) {
-                                const diffMs = now.getTime() - created.getTime();
-                                const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-                                const diffMinutes = Math.floor(diffMs / (1000 * 60));
-                                if (diffHours >= 1) {
-                                  return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
-                                } else {
-                                  return `${diffMinutes} minute${diffMinutes !== 1 ? 's' : ''} ago`;
-                                }
-                              } else if (diffDays === 1) {
-                                return '1 day ago';
-                              } else {
-                                return `${diffDays} days ago`;
-                              }
-                            })()}
-                          </span>
-                          <span>
-                            {submission['Len of Video (min)'] ? <>
-                              <span className="mx-2">•</span>
+                        <div className="text-sm text-gray-500 flex flex-wrap gap-x-2 gap-y-1">
+                            <span>
+                              Submitted&nbsp;
                               {(() => {
-                                const duration = parseFloat(submission['Len of Video (min)'] || "0");
-                                const totalSeconds = Math.round(duration * 60);
-                                const minutes = Math.floor(totalSeconds / 60);
-                                const seconds = totalSeconds % 60;
-                                return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                                const now = new Date();
+                                const created = new Date(submission['Submission Time']);
+                                const diffDays = differenceInDays(now, created);
+                                if (diffDays === 0) {
+                                  const diffMs = now.getTime() - created.getTime();
+                                  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+                                  const diffMinutes = Math.floor(diffMs / (1000 * 60));
+                                  if (diffHours >= 1) {
+                                    return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+                                  } else {
+                                    return `${diffMinutes} minute${diffMinutes !== 1 ? 's' : ''} ago`;
+                                  }
+                                } else if (diffDays === 1) {
+                                  return '1 day ago';
+                                } else {
+                                  return `${diffDays} days ago`;
+                                }
                               })()}
-                            </> : ''}
-                          </span>
-                        </div>
-                      </Link>
-                      <div className="flex flex-col items-center gap-2">
-                        {submission.Status === "Done" || submission["Coach's Feedback"] !== null ?
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            disabled={!(submission.Status === "Done" || submission["Coach's Feedback"] !== "")}
-                            onClick={() => {
-                              setSelectedFeedback(
-                                parseFeedbackBlocks(
-                                  submission['Coach\'s Feedback'] || '',
-                                  submission['Interview Prompt'],
-                                  submission['🤖✍️ Date Reviewed'] ? new Date(submission['🤖✍️ Date Reviewed']).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : (submission['Submission Time'] ? new Date(submission['Submission Time']).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : '')
-                                )
-                              );
-                              setSelectedSubmission(submission)
-                              setIsFeedbackModalOpen(true);
-                            }}
-                          >
-                            <FileText />
-                            View Feedback
-                          </Button> : <div className={`border rounded-full py-1 px-2 text-[12px] ${submission.Status == 'Dropped/ Cancelled' ? 'bg-gray-500/20' : 'bg-amber-500/20'}`}>{submission.Status}</div>
-                        }
-                        <div className="text-sm text-gray-500">
-                          {submission['Type of Submission']}{submission['Proficiency score Numeric'] && ` : ${submission['Proficiency score Numeric']}`}
+                            </span>
+                            <span>
+                              {submission['Len of Video (min)'] ? <>
+                                <span className="mx-2">•</span>
+                                {(() => {
+                                  const duration = parseFloat(submission['Len of Video (min)'] || "0");
+                                  const totalSeconds = Math.round(duration * 60);
+                                  const minutes = Math.floor(totalSeconds / 60);
+                                  const seconds = totalSeconds % 60;
+                                  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                                })()}
+                              </> : ''}
+                            </span>
+                          </div>
+                        </Link>
+                        <div className="flex flex-row md:flex-col items-center gap-2 w-full md:w-auto justify-between md:justify-center">
+                          {submission.Status === "Done" || submission["Coach's Feedback"] !== null ?
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              disabled={!(submission.Status === "Done" || submission["Coach's Feedback"] !== "")}
+                              onClick={() => {
+                                setSelectedFeedback(
+                                  parseFeedbackBlocks(
+                                    submission['Coach\'s Feedback'] || '',
+                                    submission['Interview Prompt'],
+                                    submission['🤖✍️ Date Reviewed'] ? new Date(submission['🤖✍️ Date Reviewed']).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : (submission['Submission Time'] ? new Date(submission['Submission Time']).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : '')
+                                  )
+                                );
+                                setSelectedSubmission(submission)
+                                setIsFeedbackModalOpen(true);
+                              }}
+                              className="w-full md:max-w-none max-w-[120px] md:w-auto"
+                            >
+                              <FileText className="hidden md:block w-5 h-5 mr-2"/>
+                              <span >View Feedback</span>
+                            </Button> : <div className={`border rounded-full py-1 px-2 text-[12px] ${submission.Status == 'Dropped/ Cancelled' ? 'bg-gray-500/20' : 'bg-amber-500/20'}`}>{submission.Status}</div>
+                          }
+                          <div className="text-sm text-gray-500">
+                            {submission['Type of Submission']}{submission['Proficiency score Numeric'] && ` : ${submission['Proficiency score Numeric']}`}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )
-      }
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )
+        }
 
-      {/* Feedback Modal */}
-      <FeedbackModal
-        isOpen={isFeedbackModalOpen}
-        onClose={() => setIsFeedbackModalOpen(false)}
-        feedback={selectedFeedback as any}
-        selectedSubmission={selectedSubmission}
-      />
-    </main>
-  );
-}
+        {/* Feedback Modal */}
+        <FeedbackModal
+          isOpen={isFeedbackModalOpen}
+          onClose={() => setIsFeedbackModalOpen(false)}
+          feedback={selectedFeedback as any}
+          selectedSubmission={selectedSubmission}
+        />
+      </main>
+    );
+  }

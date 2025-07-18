@@ -50,7 +50,7 @@ export default function AssessmentForm() {
       coachToReview: 'recLQ0koHrbQLbnXp',
     },
   });
-  
+
 
   useEffect(() => {
     retrieveCoach();
@@ -188,7 +188,7 @@ export default function AssessmentForm() {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
         <div className="space-y-3">
           <Label htmlFor="email" className="text-base">
-            You're logged in with the following account <span className="text-destructive">*</span>
+            You're logged in with...<span className="text-destructive">*</span>
           </Label>
           <Input
             id="email"
@@ -226,7 +226,7 @@ export default function AssessmentForm() {
 
         <div className="space-y-3">
           <Label htmlFor="prompt" className="text-base">
-            Interview Prompt: What is your submission responding to? <span className="text-destructive">*</span>
+            Interview Prompt you're responding to: <span className="text-destructive">*</span>
           </Label>
           {assessmentType === AssessmentType.BEHAVIORAL && (
             <p className="text-muted-foreground text-sm">
@@ -241,10 +241,10 @@ export default function AssessmentForm() {
           {(assessmentType === AssessmentType.PRODUCT_DESIGN ||
             assessmentType === AssessmentType.ANALYTICAL ||
             assessmentType === AssessmentType.STRATEGY) && (
-            <p className="text-muted-foreground text-sm">
-              Please select a baseline question below, or type a custom prompt to respond to. (Target time 20-25 minutes)
-            </p>
-          )}
+              <p className="text-muted-foreground text-sm">
+                Please select a baseline question below, or type a custom prompt to respond to. (Target time 20-25 minutes)
+              </p>
+            )}
 
           {/* Dynamic prompt field rendering */}
           {assessmentType === AssessmentType.CASE_STUDY ? (
