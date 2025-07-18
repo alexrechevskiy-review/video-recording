@@ -152,6 +152,13 @@ export default function AssessmentForm() {
   // Prompt options for each assessment type
   const promptOptions = {
     [AssessmentType.BEHAVIORAL]: [
+      { value: "Tell me about yourself (Recruiter frame)", label: "Tell me about yourself (Recruiter frame)" },
+      { value: "Tell me about yourself (HM framing)", label: "Tell me about yourself (HM framing)" },
+      { value: "Tell me about a time you failed.", label: "Tell me about a time you failed." },
+      { value: "Tell me about a time you had to resolve a conflict.", label: "Tell me about a time you had to resolve a conflict." },
+      { value: "Tell me about a project you're proud of.", label: "Tell me about a project you're proud of." },
+      { value: "Tell me about a time you got negative/ critical feedback.", label: "Tell me about a time you got negative/ critical feedback." },
+      { value: "Tell me about a time you had to build alignment across teams/orgs.", label: "Tell me about a time you had to build alignment across teams/orgs." },
       { value: "Other", label: "Other (User enter’s their own prompt)" },
     ],
     [AssessmentType.PRODUCT_DESIGN]: [
@@ -221,7 +228,23 @@ export default function AssessmentForm() {
           <Label htmlFor="prompt" className="text-base">
             Interview Prompt: What is your submission responding to? <span className="text-destructive">*</span>
           </Label>
-          <p className="text-muted-foreground text-sm">eg &quot;Tell me about yourself&quot; or &quot;Design Uber for people 65 and older&quot;</p>
+          {assessmentType === AssessmentType.BEHAVIORAL && (
+            <p className="text-muted-foreground text-sm">
+              Please select a baseline question below, or type a custom prompt to respond to. (Target time 3-4 minutes, max 5)
+            </p>
+          )}
+          {assessmentType === AssessmentType.CASE_STUDY && (
+            <p className="text-muted-foreground text-sm">
+              Please briefly type the prompt you are responding to (other details can be added to "Member Notes" on the bottom)
+            </p>
+          )}
+          {(assessmentType === AssessmentType.PRODUCT_DESIGN ||
+            assessmentType === AssessmentType.ANALYTICAL ||
+            assessmentType === AssessmentType.STRATEGY) && (
+            <p className="text-muted-foreground text-sm">
+              Please select a baseline question below, or type a custom prompt to respond to. (Target time 20-25 minutes)
+            </p>
+          )}
 
           {/* Dynamic prompt field rendering */}
           {assessmentType === AssessmentType.CASE_STUDY ? (
@@ -329,7 +352,7 @@ export default function AssessmentForm() {
 
         <div className="space-y-3">
           <Label htmlFor="notes" className="text-base">
-            Members Note
+            Member Note
           </Label>
           <p className="text-muted-foreground text-sm">Please add any notes, reference links, or anything else you want to share with your submission.</p>
           <Textarea

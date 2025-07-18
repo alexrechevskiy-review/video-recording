@@ -80,3 +80,8 @@
     @apply bg-background text-foreground;
   }
 }
+
+.select-option {
+  text-align: left !important;
+  display: block;
+}
