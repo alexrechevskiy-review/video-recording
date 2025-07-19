@@ -228,14 +228,6 @@ export default function VideoReview() {
       // Consider successful if both Google Drive upload and webhook submission succeeded
       if (result.webhookSuccess && result.googleDriveFileId) {
         setSubmissionComplete(true);
-
-        // Show success toast
-        toast({
-          title: "Recording Submitted Successfully!",
-          description: "Your recording has been uploaded to Google Drive and your assessment information has been submitted.",
-          variant: "default",
-        });
-
         // Clear session on success
         clearGoogleDriveSession();
 
@@ -344,13 +336,7 @@ export default function VideoReview() {
         "flex-1 flex flex-col container m-auto py-4 overflow-hidden",
         isMobile ? "px-4 max-w-full" : "max-w-5xl"
       )}>
-        {/* CSM Loading Indicator */}
-        {isGettingCsmList && (
-          <div className="flex items-center justify-center mb-4">
-            <Loader2 className="h-5 w-5 animate-spin mr-2" />
-            <span>Loading your CRM information...</span>
-          </div>
-        )}
+
         {/* Video player with loading overlay - Height constrained on mobile */}
         <div className={cn(
           "relative bg-black rounded-xl overflow-hidden md:mb-6 mb-3 flex-shrink-0 flex justify-center",
@@ -486,9 +472,16 @@ export default function VideoReview() {
                       {icon}
                       <span className="text-sm">Overall Submission</span>
                     </div> */}
-                  <span className="text-xs text-gray-500">
-                    {statusText}
-                  </span>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-gray-500">
+                      {statusText}
+                    </span>
+                    {combinedStatus === 'uploading' && (
+                      <span className="text-xs text-gray-500 mt-1">
+                        {combinedProgress > 0 ? `${Math.round(combinedProgress)}%` : ''}
+                      </span>
+                    )}
+                  </div>
                   {/* Progress Bar Row */}
                   {(combinedStatus === 'uploading' || combinedStatus === 'pending') && (
                     <div className="mb-2">
@@ -498,11 +491,7 @@ export default function VideoReview() {
                           className="h-full bg-primary transition-all"
                         />
                       </div>
-                      {combinedStatus === 'uploading' && (
-                        <p className="text-xs text-gray-500 mt-1">
-                          {combinedProgress > 0 ? `${Math.round(combinedProgress)}%` : ''}
-                        </p>
-                      )}
+
                     </div>
                   )}
                   {/* Error Messages */}
@@ -563,48 +552,29 @@ export default function VideoReview() {
         )}
         {/* Submit button - Fixed at bottom */}
         <div className="flex justify-end gap-4 md:p-0">
-          {!submissionComplete ? (
-            !showRetryButton ? (
-              <Button
-                size="lg"
-                onClick={handleSubmit}
-                disabled={isSubmitting || isVideoLoading || Boolean(videoLoadError) || isGettingCsmList}
-                className="px-8 md:w-auto w-full"
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    <span>Submitting...</span>
-                  </>
-                ) : (
-                  <>
-                    <Send className="mr-2 h-5 w-5" />
-                    Submit Recording
-                  </>
-                )}
-              </Button>
-            ) : (
-              <Button
-                size="lg"
-                onClick={handleRetry}
-                disabled={isSubmitting || isGettingCsmList}
-                className="px-8 md:w-auto w-full md:hidden flex"
-                variant="default"
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    <span>Retrying...</span>
-                  </>
-                ) : (
-                  <>
-                    <RefreshCw className="mr-2 h-5 w-5" />
-                    Retry Submission
-                  </>
-                )}
-              </Button>
-            )
-          ) : null}
+          {!submissionComplete && !showRetryButton && !isSubmitting && (
+            <Button
+              size="lg"
+              onClick={handleSubmit}
+              disabled={isVideoLoading || Boolean(videoLoadError) || isGettingCsmList}
+              className="px-8 md:w-auto w-full"
+            >
+              <Send className="mr-2 h-5 w-5" />
+              {isGettingCsmList ? 'Loading your CRM info...' : 'Recording'}
+            </Button>
+          )}
+          {!submissionComplete && showRetryButton && !isSubmitting && (
+            <Button
+              size="lg"
+              onClick={handleRetry}
+              disabled={isGettingCsmList}
+              className="px-8 md:w-auto w-full md:hidden flex"
+              variant="default"
+            >
+              <RefreshCw className="mr-2 h-5 w-5" />
+              {isGettingCsmList ? 'Loading your CRM info...' : 'Recording'}
+            </Button>
+          )}
         </div>
       </div>
     </div>

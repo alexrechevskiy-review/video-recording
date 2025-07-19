@@ -33,7 +33,6 @@ const Thanks = () => {
           </Button>
           <Button
             onClick={handleBack}
-            variant="secondary"
             className="w-48"
           >
             Record another video
