@@ -438,7 +438,7 @@ export default function HistoryPage() {
                             <span >View Feedback</span>
                           </Button> : <div className={`border rounded-full py-1 px-2 text-[12px] text-center ${submission.Status == 'Dropped/ Cancelled' ? 'bg-gray-500/20' : 'bg-amber-500/20'}`}>{submission.Status}</div>
                         }
-                        <div className="text-sm text-gray-500 text-[12px] md:text-base">
+                        <div className="text-sm text-gray-500 text-[12px] md:text-[16px]">
                           {submission['Type of Submission']}{submission['Proficiency score Numeric'] && ` : ${submission['Proficiency score Numeric']}`}
                         </div>
                       </div>
