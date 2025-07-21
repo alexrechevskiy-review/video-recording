@@ -86,15 +86,20 @@ export async function POST(request: NextRequest) {
                 p => p.emailAddress === userEmail
             );
             if (!alreadyShared) {
-                await drive.permissions.create({
-                    fileId: userFolderId,
-                    requestBody: {
-                        type: "user",
-                        role: "writer",
-                        emailAddress: userEmail,
-                    },
-                    supportsAllDrives: true,
-                });
+                try {
+                    await drive.permissions.create({
+                        fileId: userFolderId,
+                        requestBody: {
+                            type: "user",
+                            role: "writer",
+                            emailAddress: userEmail,
+                        },
+                        supportsAllDrives: true,
+                    });
+                } catch (shareError: any) {
+                    // Log the error but do not throw, regardless of error type
+                    console.warn('Google Drive sharing error (ignored):', shareError?.message || shareError);
+                }
             }
         } catch (folderError) {
             console.error('Error managing user folder:', folderError);

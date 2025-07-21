@@ -277,9 +277,6 @@ export default function HistoryPage() {
                 )}
               </Button>
             </form>
-            <p className="text-sm text-muted-foreground mt-2">
-              Test: nidhig318@gmail.com
-            </p>
           </CardContent>
         </Card>
       }
