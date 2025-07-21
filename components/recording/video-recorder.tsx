@@ -516,8 +516,8 @@ export default function VideoRecorder() {
             videoRef={previewVideoRef}
           />
 
-          {/* Top overlay - Back button */}
-          <div className="absolute top-0 left-0 right-0 z-20 p-4 bg-gradient-to-b from-black/50 to-transparent">
+          {/* Top overlay - Back button and prompt */}
+          <div className="absolute top-0 left-0 right-0 z-20 p-4 bg-gradient-to-b from-black/50 to-transparent flex flex-col gap-2">
             <Button
               variant="ghost"
               size="icon"
@@ -527,6 +527,9 @@ export default function VideoRecorder() {
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
+            <span className="text-white text-base font-medium text-center truncate max-w-xs mx-auto" title={formData?.prompt || ''}>
+              {formData?.prompt || <span className="text-gray-300">No prompt</span>}
+            </span>
           </div>
 
           {/* Recording timer overlay */}
@@ -669,7 +672,7 @@ export default function VideoRecorder() {
         <>
           {/* Header */}
           <div className="md:p-4 p-0 border-b flex-shrink-0">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between w-full">
               <Button
                 variant="ghost"
                 size="icon"
@@ -678,15 +681,19 @@ export default function VideoRecorder() {
               >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
-
-              {isRecording && (
-                <RecordingTimer
-                  isRecording={isRecording}
-                  onTimeUpdate={setRecordingDuration}
-                />
-              )}
-
-              <div className="w-10" />
+              <div className="flex-1 flex flex-col items-center">
+                <span className="text-base font-medium text-center truncate max-w-xs md:max-w-md" title={formData?.prompt || ''}>
+                  {formData?.prompt || <span className="text-gray-400">No prompt</span>}
+                </span>
+              </div>
+              <div className="flex items-center min-w-[80px] justify-end">
+                {isRecording && (
+                  <RecordingTimer
+                    isRecording={isRecording}
+                    onTimeUpdate={setRecordingDuration}
+                  />
+                )}
+              </div>
             </div>
           </div>
 
@@ -745,44 +752,12 @@ export default function VideoRecorder() {
                 onSettingsChange={handleSettingsChange}
                 disabled={false}
                 className="mb-4"
+                isRecording={isRecording}
+                isCountingDown={isCountingDown}
+                error={error}
+                startRecordingAfterCountdown={startRecordingAfterCountdown}
+                stopRecording={stopRecording}
               />
-
-              <div className="flex gap-4 w-full justify-between">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  onClick={handleBack}
-                  disabled={isCountingDown}
-                >
-                  Back to Form
-                </Button>
-                {!isRecording ? (
-                  <Button
-                    size="lg"
-                    onClick={startRecordingAfterCountdown}
-                    disabled={
-                      isCountingDown ||
-                      !settings.microphoneEnabled || // Only require microphone
-                      Boolean(error)
-                    }
-                    className="bg-destructive hover:bg-destructive/90 text-white px-8 transition-all duration-300"
-                  >
-                    <PlayCircle className="mr-2 h-5 w-5" />
-                    Start Recording
-                  </Button>
-                ) : (
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    onClick={stopRecording}
-                    className="px-8 border-destructive text-destructive hover:bg-destructive/10"
-                  >
-                    <StopCircle className="mr-2 h-5 w-5" />
-                    Stop Recording
-                  </Button>
-                )}
-
-              </div>
             </div>
           </div>
         </>
