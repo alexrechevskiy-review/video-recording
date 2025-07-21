@@ -342,12 +342,11 @@ export default function HistoryPage() {
                               : submission['Interview Prompt']
                             : 'Interview Prompt'}
                         </h4>
-                        <div className="text-sm text-gray-500">
-                          {submission['Interview Type']}
-                        </div>
-                        <div className="text-sm text-gray-500 flex flex-wrap gap-x-2 gap-y-1">
-                            <span>
-                              Submitted&nbsp;
+                        <div className="text-sm text-gray-500 flex md:justify-start justify-between items-center">
+                          <span className="flex">
+                            {submission['Interview Type']}
+                            <span className="md:hidden block">
+                              <span className="mx-2">•</span>
                               {(() => {
                                 const now = new Date();
                                 const created = new Date(submission['Submission Time']);
@@ -368,63 +367,100 @@ export default function HistoryPage() {
                                 }
                               })()}
                             </span>
-                            <span>
-                              {submission['Len of Video (min)'] ? <>
-                                <span className="mx-2">•</span>
-                                {(() => {
-                                  const duration = parseFloat(submission['Len of Video (min)'] || "0");
-                                  const totalSeconds = Math.round(duration * 60);
-                                  const minutes = Math.floor(totalSeconds / 60);
-                                  const seconds = totalSeconds % 60;
-                                  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-                                })()}
-                              </> : ''}
-                            </span>
-                          </div>
-                        </Link>
-                        <div className="flex flex-row md:flex-col items-center gap-2 w-full md:w-auto justify-between md:justify-center">
-                          {submission.Status === "Done" || submission["Coach's Feedback"] !== null ?
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              disabled={!(submission.Status === "Done" || submission["Coach's Feedback"] !== "")}
-                              onClick={() => {
-                                setSelectedFeedback(
-                                  parseFeedbackBlocks(
-                                    submission['Coach\'s Feedback'] || '',
-                                    submission['Interview Prompt'],
-                                    submission['🤖✍️ Date Reviewed'] ? new Date(submission['🤖✍️ Date Reviewed']).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : (submission['Submission Time'] ? new Date(submission['Submission Time']).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : '')
-                                  )
-                                );
-                                setSelectedSubmission(submission)
-                                setIsFeedbackModalOpen(true);
-                              }}
-                              className="w-full md:max-w-none max-w-[120px] md:w-auto"
-                            >
-                              <FileText className="hidden md:block w-5 h-5 mr-2"/>
-                              <span >View Feedback</span>
-                            </Button> : <div className={`border rounded-full py-1 px-2 text-[12px] ${submission.Status == 'Dropped/ Cancelled' ? 'bg-gray-500/20' : 'bg-amber-500/20'}`}>{submission.Status}</div>
-                          }
-                          <div className="text-sm text-gray-500">
-                            {submission['Type of Submission']}{submission['Proficiency score Numeric'] && ` : ${submission['Proficiency score Numeric']}`}
-                          </div>
+                          </span>
+                          <span>
+                            {submission['Len of Video (min)'] ? <>
+                              <span className="mx-2 hidden md:inline-block">•</span>
+                              {(() => {
+                                const duration = parseFloat(submission['Len of Video (min)'] || "0");
+                                const totalSeconds = Math.round(duration * 60);
+                                const minutes = Math.floor(totalSeconds / 60);
+                                const seconds = totalSeconds % 60;
+                                return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                              })()}
+                            </> : ''}
+                          </span>
+                        </div>
+                        <div className="text-sm text-gray-500 flex-wrap gap-x-2 gap-y-1 md:flex hidden">
+                          <span>
+                            Submitted&nbsp;
+                            {(() => {
+                              const now = new Date();
+                              const created = new Date(submission['Submission Time']);
+                              const diffDays = differenceInDays(now, created);
+                              if (diffDays === 0) {
+                                const diffMs = now.getTime() - created.getTime();
+                                const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+                                const diffMinutes = Math.floor(diffMs / (1000 * 60));
+                                if (diffHours >= 1) {
+                                  return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+                                } else {
+                                  return `${diffMinutes} minute${diffMinutes !== 1 ? 's' : ''} ago`;
+                                }
+                              } else if (diffDays === 1) {
+                                return '1 day ago';
+                              } else {
+                                return `${diffDays} days ago`;
+                              }
+                            })()}
+                          </span>
+                          <span className="md:hidden block">
+                            {submission['Len of Video (min)'] ? <>
+                              <span className="mx-2">•</span>
+                              {(() => {
+                                const duration = parseFloat(submission['Len of Video (min)'] || "0");
+                                const totalSeconds = Math.round(duration * 60);
+                                const minutes = Math.floor(totalSeconds / 60);
+                                const seconds = totalSeconds % 60;
+                                return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                              })()}
+                            </> : ''}
+                          </span>
+                        </div>
+                      </Link>
+                      <div className="flex md:flex-col flex-row-reverse items-center gap-2 w-full md:w-auto justify-between md:justify-center">
+                        {submission.Status === "Done" || submission["Coach's Feedback"] !== null ?
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={!(submission.Status === "Done" || submission["Coach's Feedback"] !== "")}
+                            onClick={() => {
+                              setSelectedFeedback(
+                                parseFeedbackBlocks(
+                                  submission['Coach\'s Feedback'] || '',
+                                  submission['Interview Prompt'],
+                                  submission['🤖✍️ Date Reviewed'] ? new Date(submission['🤖✍️ Date Reviewed']).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : (submission['Submission Time'] ? new Date(submission['Submission Time']).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : '')
+                                )
+                              );
+                              setSelectedSubmission(submission)
+                              setIsFeedbackModalOpen(true);
+                            }}
+                            className="w-full md:max-w-none max-w-[150px] md:w-auto"
+                          >
+                            <FileText className="w-5 h-5 mr-2" />
+                            <span >View Feedback</span>
+                          </Button> : <div className={`border rounded-full py-1 px-2 text-[12px] ${submission.Status == 'Dropped/ Cancelled' ? 'bg-gray-500/20' : 'bg-amber-500/20'}`}>{submission.Status}</div>
+                        }
+                        <div className="text-sm text-gray-500">
+                          {submission['Type of Submission']}{submission['Proficiency score Numeric'] && ` : ${submission['Proficiency score Numeric']}`}
                         </div>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )
-        }
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )
+      }
 
-        {/* Feedback Modal */}
-        <FeedbackModal
-          isOpen={isFeedbackModalOpen}
-          onClose={() => setIsFeedbackModalOpen(false)}
-          feedback={selectedFeedback as any}
-          selectedSubmission={selectedSubmission}
-        />
-      </main>
-    );
-  }
+      {/* Feedback Modal */}
+      <FeedbackModal
+        isOpen={isFeedbackModalOpen}
+        onClose={() => setIsFeedbackModalOpen(false)}
+        feedback={selectedFeedback as any}
+        selectedSubmission={selectedSubmission}
+      />
+    </main>
+  );
+}
