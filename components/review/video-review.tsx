@@ -560,7 +560,7 @@ export default function VideoReview() {
               className="px-8 md:w-auto w-full"
             >
               <Send className="mr-2 h-5 w-5" />
-              {isGettingCsmList ? 'Loading your CRM info...' : 'Recording'}
+              {isGettingCsmList ? 'Loading your CRM info...' : 'Submit'}
             </Button>
           )}
           {!submissionComplete && showRetryButton && !isSubmitting && (
@@ -572,7 +572,7 @@ export default function VideoReview() {
               variant="default"
             >
               <RefreshCw className="mr-2 h-5 w-5" />
-              {isGettingCsmList ? 'Loading your CRM info...' : 'Recording'}
+              {isGettingCsmList ? 'Loading your CRM info...' : 'Submit'}
             </Button>
           )}
         </div>
