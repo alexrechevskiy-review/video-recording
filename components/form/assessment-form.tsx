@@ -230,7 +230,7 @@ export default function AssessmentForm() {
           </Label>
           {assessmentType === AssessmentType.BEHAVIORAL && (
             <p className="text-muted-foreground text-sm">
-              Please select a baseline question below, or type a custom prompt to respond to. (Target time 3-4 minutes, max 5)
+              Please select & respond to a baseline question below, or type a custom prompt. (Target: 3-4 minutes, max 5)
             </p>
           )}
           {assessmentType === AssessmentType.CASE_STUDY && (
