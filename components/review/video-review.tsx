@@ -319,15 +319,15 @@ export default function VideoReview() {
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <div className="flex flex-col items-center">
+          <div className="flex items-center">
             <h1 className="text-lg font-medium">Review Your Recording</h1>
             {/* Video info - Fixed height */}
-            {!isVideoLoading && !videoLoadError && (
-              <div className="">
-                {recordedData.duration ? `${formatTime(recordedData.duration)}` : ""}
-              </div>
-            )}
           </div>
+          {!isVideoLoading && !videoLoadError && (
+            <div className="absolute right-4">
+              {recordedData.duration ? `${formatTime(recordedData.duration)}` : ""}
+            </div>
+          )}
         </div>
       </div>
 

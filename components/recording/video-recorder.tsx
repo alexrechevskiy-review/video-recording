@@ -527,7 +527,7 @@ export default function VideoRecorder() {
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <span className="text-white text-base font-medium text-center truncate max-w-xs mx-auto" title={formData?.prompt || ''}>
+            <span className="text-white md:block hidden text-base font-medium text-center truncate max-w-xs mx-auto" title={formData?.prompt || ''}>
               {formData?.prompt || <span className="text-gray-300">No prompt</span>}
             </span>
           </div>
@@ -682,7 +682,7 @@ export default function VideoRecorder() {
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <div className="flex-1 flex flex-col items-center">
-                <span className="text-base font-medium text-center truncate max-w-xs md:max-w-md" title={formData?.prompt || ''}>
+                <span className="text-base font-medium text-center max-w-xs md:max-w-md" title={formData?.prompt || ''}>
                   {formData?.prompt || <span className="text-gray-400">No prompt</span>}
                 </span>
               </div>
@@ -739,7 +739,7 @@ export default function VideoRecorder() {
 
               {/* Countdown overlay */}
               {isCountingDown && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                <div className="absolute right-4 inset-0 flex items-center justify-center bg-black/50">
                   <CountdownTimer onComplete={startRecording} />
                 </div>
               )}
