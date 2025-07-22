@@ -271,7 +271,7 @@ export default function AssessmentForm() {
                 }}
                 name="promptDropdown"
               >
-                <SelectTrigger className="min-h-[44px] w-full">
+                <SelectTrigger className="min-h-[44px] w-full min-w-0">
                   <SelectValue placeholder="Select a prompt" />
                 </SelectTrigger>
                 <SelectContent>
