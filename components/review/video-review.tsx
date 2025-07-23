@@ -2,7 +2,7 @@
 
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Send, Loader2, CheckCircle, AlertCircle, RefreshCw, Download } from "lucide-react";
+import { ArrowLeft, Send, Loader2, CheckCircle, AlertCircle, RefreshCw, Download, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRecording } from "@/context/RecordingContext";
 import { formatTime, uploadRecordingToBothServices, UploadProgress, clearGoogleDriveSession, stopAllMediaTracks } from "@/lib/recording-utils";
@@ -308,7 +308,7 @@ export default function VideoReview() {
   return (
     <div className="w-full h-full flex flex-col">
       {/* Header */}
-      <div className="md:p-4 p-0 border-b">
+      <div className="p-4 border-b">
         <div className="w-full relative flex items-center justify-center">
           <Button
             variant="ghost"
@@ -324,7 +324,8 @@ export default function VideoReview() {
             {/* Video info - Fixed height */}
           </div>
           {!isVideoLoading && !videoLoadError && (
-            <div className="absolute right-4">
+            <div className="absolute right-2 flex items-center gap-1">
+              <Clock className="h-3.5 w-3.5" />
               {recordedData.duration ? `${formatTime(recordedData.duration)}` : ""}
             </div>
           )}
