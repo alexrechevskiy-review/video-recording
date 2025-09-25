@@ -277,6 +277,37 @@ export default function VideoReview() {
     performSubmission(true);
   };
 
+  const handleDownload = () => {
+    if (!recordedData?.videoBlob) return;
+    
+    // Generate filename with email and timestamp
+    const now = new Date();
+    const timestamp = now.toLocaleString('en-US', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    }).replace(/[^\w\s-]/g, '').replace(/\s+/g, '_');
+    
+    const email = formData?.email || 'unknown';
+    const cleanEmail = email.replace(/[^\w\s-]/g, '').replace(/\s+/g, '_');
+    const filename = `${cleanEmail}_${timestamp}.${extension}`;
+    
+    const url = URL.createObjectURL(recordedData.videoBlob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 100);
+  };
+
   useEffect(() => {
     stopAllMediaTracks();
   }, []);
@@ -452,12 +483,29 @@ export default function VideoReview() {
               const icon = getUploadStatusIcon(combinedStatus);
 
               // Download handler for failed uploads
-              const handleDownload = () => {
+              const handleDownloadInProgress = () => {
                 if (!recordedData?.videoBlob) return;
+                
+                // Generate filename with email and timestamp
+                const now = new Date();
+                const timestamp = now.toLocaleString('en-US', {
+                  year: 'numeric',
+                  month: '2-digit',
+                  day: '2-digit',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  second: '2-digit',
+                  hour12: false
+                }).replace(/[^\w\s-]/g, '').replace(/\s+/g, '_');
+                
+                const email = formData?.email || 'unknown';
+                const cleanEmail = email.replace(/[^\w\s-]/g, '').replace(/\s+/g, '_');
+                const filename = `${cleanEmail}_${timestamp}.${extension}`;
+                
                 const url = URL.createObjectURL(recordedData.videoBlob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `recording.${extension}`;
+                a.download = filename;
                 document.body.appendChild(a);
                 a.click();
                 setTimeout(() => {
@@ -505,11 +553,9 @@ export default function VideoReview() {
                   {showRetryButton && !isSubmitting && (
                     <div className="md:flex hidden md:mx-auto mx-2 md:max-w-xs max-w-none pt-3 border-gray-200 gap-3 items-center justify-center">
                       {url && (
-                        <Button size="lg" variant='outline' className="flex justify-center items-center gap-3">
+                        <Button size="lg" variant='outline' className="flex justify-center items-center gap-3" onClick={handleDownloadInProgress}>
                           <Download className="w-5 h-5" />
-                          <a href={url} download={`recording.${extension}`} className="flex justify-center items-center gap-3">
-                            Download Video
-                          </a>
+                          Download Video
                         </Button>
                       )}
                       <Button
@@ -540,41 +586,61 @@ export default function VideoReview() {
         )}
         {/* Download Reminder and Retry Button on Failure */}
         {showRetryButton && !isSubmitting && (
-          <Button variant='outline' className="md:hidden md:mx-auto mb-2 md:max-w-xs max-w-none t-3 border-gray-200 flex flex-col gap-3 items-center">
-            {url && (
-              <div className="flex justify-center items-center gap-3">
-                <Download />
-                <a href={url} download={`recording.${extension}`}>
-                  Download Video
-                </a>
-              </div>
-            )}
+          <Button variant='outline' className="md:hidden md:mx-auto mb-2 md:max-w-xs max-w-none t-3 border-gray-200 flex flex-col gap-3 items-center" onClick={handleDownload}>
+            <div className="flex justify-center items-center gap-3">
+              <Download />
+              Download Video
+            </div>
           </Button>
         )}
         {/* Submit button - Fixed at bottom */}
         <div className="flex justify-end gap-4 md:p-0">
           {!submissionComplete && !showRetryButton && !isSubmitting && (
-            <Button
-              size="lg"
-              onClick={handleSubmit}
-              disabled={isVideoLoading || Boolean(videoLoadError) || isGettingCsmList}
-              className="px-8 md:w-auto w-full"
-            >
-              <Send className="mr-2 h-5 w-5" />
-              {isGettingCsmList ? 'Loading your CRM info...' : 'Submit'}
-            </Button>
+            <>
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={handleDownload}
+                disabled={isVideoLoading || Boolean(videoLoadError)}
+                className="px-8 md:w-auto w-full"
+              >
+                <Download className="mr-2 h-5 w-5" />
+                Download Video
+              </Button>
+              <Button
+                size="lg"
+                onClick={handleSubmit}
+                disabled={isVideoLoading || Boolean(videoLoadError) || isGettingCsmList}
+                className="px-8 md:w-auto w-full"
+              >
+                <Send className="mr-2 h-5 w-5" />
+                {isGettingCsmList ? 'Loading your CRM info...' : 'Submit'}
+              </Button>
+            </>
           )}
           {!submissionComplete && showRetryButton && !isSubmitting && (
-            <Button
-              size="lg"
-              onClick={handleRetry}
-              disabled={isGettingCsmList}
-              className="px-8 md:w-auto w-full md:hidden flex"
-              variant="default"
-            >
-              <RefreshCw className="mr-2 h-5 w-5" />
-              {isGettingCsmList ? 'Loading your CRM info...' : 'Submit'}
-            </Button>
+            <>
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={handleDownload}
+                disabled={isVideoLoading || Boolean(videoLoadError)}
+                className="px-8 md:w-auto w-full md:hidden flex"
+              >
+                <Download className="mr-2 h-5 w-5" />
+                Download Video
+              </Button>
+              <Button
+                size="lg"
+                onClick={handleRetry}
+                disabled={isGettingCsmList}
+                className="px-8 md:w-auto w-full md:hidden flex"
+                variant="default"
+              >
+                <RefreshCw className="mr-2 h-5 w-5" />
+                {isGettingCsmList ? 'Loading your CRM info...' : 'Submit'}
+              </Button>
+            </>
           )}
         </div>
       </div>

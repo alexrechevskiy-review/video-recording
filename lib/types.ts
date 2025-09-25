@@ -25,6 +25,7 @@ export type RecordingSettings = {
   cameraEnabled: boolean;
   microphoneEnabled: boolean;
   screenShareEnabled: boolean;
+  selectedMicrophoneId?: string;
 };
 
 export type RecordedData = {

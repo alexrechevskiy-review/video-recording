@@ -1,11 +1,18 @@
 "use client";
 
-import React from "react";
-import { Camera, Mic, Monitor, CameraOff, MicOff, MonitorOff } from "lucide-react";
+import React, { useState } from "react";
+import { Camera, Mic, Monitor, CameraOff, MicOff, MonitorOff, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RecordingSettings } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { isMobileDevice } from "@/lib/recording-utils";
+import MicrophoneSelector from "./microphone-selector";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface MediaControlsProps {
   settings: RecordingSettings;
@@ -17,6 +24,7 @@ interface MediaControlsProps {
   error: string | null;
   startRecordingAfterCountdown: () => void;
   stopRecording: () => void;
+  availableMicrophones?: MediaDeviceInfo[];
 }
 
 export default function MediaControls({
@@ -29,6 +37,7 @@ export default function MediaControls({
   error,
   startRecordingAfterCountdown,
   stopRecording,
+  availableMicrophones = [],
 }: MediaControlsProps) {
   const isMobile = isMobileDevice();
 
@@ -53,23 +62,126 @@ export default function MediaControls({
     });
   };
 
-  return (
-    <div className={cn("flex items-center justify-center gap-4", className)}>
+  const handleMicrophoneSelect = (deviceId: string) => {
+    onSettingsChange({
+      ...settings,
+      selectedMicrophoneId: deviceId,
+    });
+  };
 
-      <Button
-        variant={settings.microphoneEnabled ? "default" : "outline"}
-        size="icon"
-        onClick={toggleMicrophone}
-        disabled={disabled}
-        className="h-12 w-12 rounded-full"
-        aria-label={settings.microphoneEnabled ? "Turn microphone off" : "Turn microphone on"}
-      >
-        {settings.microphoneEnabled ? (
-          <Mic className="h-5 w-5" />
-        ) : (
-          <MicOff className="h-5 w-5" />
+  const getMicrophoneLabel = (device: MediaDeviceInfo) => {
+    if (device.label && device.label.trim() !== '') {
+      // Remove device ID from the end of the label (usually in format "Device Name (ID)")
+      const cleanLabel = device.label.replace(/\s*\([^)]+\)\s*$/, '').trim();
+      return cleanLabel || device.label;
+    }
+    return `Microphone ${device.deviceId.slice(0, 8)}`;
+  };
+
+  return (
+    <div className={cn("flex flex-row items-center justify-center gap-4", className)}>
+      {/* Microphone Section */}
+      <div className="flex flex-col items-center gap-2">
+        {/* Mobile: Arrow above microphone button */}
+        {isMobile && settings.microphoneEnabled && availableMicrophones.length > 1 && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                disabled={disabled}
+                className="h-8 w-8 p-0"
+                aria-label="Select microphone"
+              >
+                <ChevronUp className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-64" side="bottom">
+              {availableMicrophones.length === 0 ? (
+                <DropdownMenuItem disabled>
+                  No microphones available
+                </DropdownMenuItem>
+              ) : (
+                availableMicrophones.map((microphone) => (
+                  <DropdownMenuItem
+                    key={microphone.deviceId}
+                    onClick={() => handleMicrophoneSelect(microphone.deviceId)}
+                    className={cn(
+                      "cursor-pointer",
+                      settings.selectedMicrophoneId === microphone.deviceId && "bg-accent"
+                    )}
+                  >
+                    <div className="flex flex-col items-start min-w-0">
+                      <span className="font-medium truncate w-full">
+                        {getMicrophoneLabel(microphone)}
+                      </span>
+                    </div>
+                  </DropdownMenuItem>
+                ))
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
-      </Button>
+
+        {/* Microphone Toggle Button */}
+        <div className="flex items-center gap-2">
+          {/* Desktop: Arrow to the left of microphone button */}
+          {!isMobile && settings.microphoneEnabled && availableMicrophones.length > 1 && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  disabled={disabled}
+                  className="h-8 w-8 p-0"
+                  aria-label="Select microphone"
+                >
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-64" side="bottom">
+                {availableMicrophones.length === 0 ? (
+                  <DropdownMenuItem disabled>
+                    No microphones available
+                  </DropdownMenuItem>
+                ) : (
+                  availableMicrophones.map((microphone) => (
+                    <DropdownMenuItem
+                      key={microphone.deviceId}
+                      onClick={() => handleMicrophoneSelect(microphone.deviceId)}
+                      className={cn(
+                        "cursor-pointer",
+                        settings.selectedMicrophoneId === microphone.deviceId && "bg-accent"
+                      )}
+                    >
+                      <div className="flex flex-col items-start min-w-0">
+                        <span className="font-medium truncate w-full">
+                          {getMicrophoneLabel(microphone)}
+                        </span>
+                      </div>
+                    </DropdownMenuItem>
+                  ))
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+
+          <Button
+            variant={settings.microphoneEnabled ? "default" : "outline"}
+            size="icon"
+            onClick={toggleMicrophone}
+            disabled={disabled}
+            className="h-12 w-12 rounded-full"
+            aria-label={settings.microphoneEnabled ? "Turn microphone off" : "Turn microphone on"}
+          >
+            {settings.microphoneEnabled ? (
+              <Mic className="h-5 w-5" />
+            ) : (
+              <MicOff className="h-5 w-5" />
+            )}
+          </Button>
+        </div>
+      </div>
 
       {!isMobile && (
         <>

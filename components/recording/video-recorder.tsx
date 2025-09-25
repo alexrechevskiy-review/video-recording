@@ -2,8 +2,14 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, PlayCircle, StopCircle, X, Camera, Mic, CameraOff, MicOff, Play, Square } from "lucide-react";
+import { ArrowLeft, PlayCircle, StopCircle, X, Camera, Mic, CameraOff, MicOff, Play, Square, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useRecording } from "@/context/RecordingContext";
 import VideoPreview from "./video-preview";
 import MediaControls from "./media-controls";
@@ -58,7 +64,9 @@ export default function VideoRecorder() {
     cameraEnabled: true,
     microphoneEnabled: true,
     screenShareEnabled: false,
+    selectedMicrophoneId: undefined,
   });
+  const [availableMicrophones, setAvailableMicrophones] = useState<MediaDeviceInfo[]>([]);
   const [previewStream, setPreviewStream] = useState<MediaStream | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [isCountingDown, setIsCountingDown] = useState(false);
@@ -197,12 +205,19 @@ export default function VideoRecorder() {
         if (settings.microphoneEnabled && !audioStreamRef.current) {
           try {
             console.log("Requesting microphone stream...");
+            const audioConstraints: MediaTrackConstraints = {
+              echoCancellation: true,
+              noiseSuppression: true,
+              sampleRate: 44100,
+            };
+            
+            // Add device ID if a specific microphone is selected
+            if (settings.selectedMicrophoneId) {
+              audioConstraints.deviceId = { exact: settings.selectedMicrophoneId };
+            }
+            
             const stream = await navigator.mediaDevices.getUserMedia({
-              audio: {
-                echoCancellation: true,
-                noiseSuppression: true,
-                sampleRate: 44100,
-              },
+              audio: audioConstraints,
               video: false,
             });
             console.log("Microphone stream obtained:", stream);
@@ -486,10 +501,43 @@ export default function VideoRecorder() {
     }
   };
 
+  // Function to get available microphones
+  const getAvailableMicrophones = async () => {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const microphones = devices.filter(device => device.kind === 'audioinput');
+      setAvailableMicrophones(microphones);
+      
+      // If no microphone is selected and we have microphones available, select the first one
+      if (!settings.selectedMicrophoneId && microphones.length > 0) {
+        setSettings(prev => ({
+          ...prev,
+          selectedMicrophoneId: microphones[0].deviceId
+        }));
+      }
+    } catch (error) {
+      console.error("Error getting microphones:", error);
+    }
+  };
+
   // Add this useEffect to check permissions when component mounts ONLY
   useEffect(() => {
     checkPermissions();
+    getAvailableMicrophones();
   }, []); // Empty dependency array - only run once on mount
+
+  // Listen for device changes
+  useEffect(() => {
+    const handleDeviceChange = () => {
+      getAvailableMicrophones();
+    };
+
+    navigator.mediaDevices.addEventListener('devicechange', handleDeviceChange);
+    
+    return () => {
+      navigator.mediaDevices.removeEventListener('devicechange', handleDeviceChange);
+    };
+  }, []);
 
   // Cleanup on component unmount
   useEffect(() => {
@@ -589,8 +637,84 @@ export default function VideoRecorder() {
                 Back
               </Button>
 
-
-              <Button
+              {/* Mobile: Microphone section with arrow above */}
+              {isMobile ? (
+                <div className="flex flex-col items-center">
+                  {/* Arrow above microphone button */}
+                  {settings.microphoneEnabled && availableMicrophones.length > 1 && (
+                    <div className="relative">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            disabled={false}
+                            className="absolute -top-8 left-1/2 transform -translate-x-1/2 h-8 w-8 p-0 text-white hover:bg-white/20"
+                            aria-label="Select microphone"
+                          >
+                            <ChevronUp size={12} />
+                          </Button>
+                        </DropdownMenuTrigger>
+                      <DropdownMenuContent className="w-64" side="bottom">
+                        {availableMicrophones.length === 0 ? (
+                          <DropdownMenuItem disabled>
+                            No microphones available
+                          </DropdownMenuItem>
+                        ) : (
+                          availableMicrophones.map((microphone) => (
+                            <DropdownMenuItem
+                              key={microphone.deviceId}
+                              onClick={() => handleSettingsChange({
+                                ...settings,
+                                selectedMicrophoneId: microphone.deviceId,
+                              })}
+                              className={cn(
+                                "cursor-pointer",
+                                settings.selectedMicrophoneId === microphone.deviceId && "bg-accent"
+                              )}
+                            >
+                              <div className="flex flex-col items-start min-w-0">
+                                <span className="font-medium truncate w-full">
+                                  {microphone.label && microphone.label.trim() !== ''
+                                    ? microphone.label.replace(/\s*\([^)]+\)\s*$/, '').trim() || microphone.label
+                                    : `Microphone ${microphone.deviceId.slice(0, 8)}`
+                                  }
+                                </span>
+                              </div>
+                            </DropdownMenuItem>
+                          ))
+                        )}
+                      </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  )}
+                  
+                  {/* Microphone toggle button */}
+                  <Button
+                    variant={settings.microphoneEnabled ? "default" : "outline"}
+                    size="icon"
+                    onClick={() => handleSettingsChange({
+                      ...settings,
+                      microphoneEnabled: !settings.microphoneEnabled,
+                    })}
+                    disabled={false}
+                    className={cn(
+                      "h-10 w-10 rounded-full",
+                      settings.microphoneEnabled
+                        ? "bg-white text-black hover:bg-white/90"
+                        : "bg-white/20 border-white/30 text-white hover:bg-white/30 backdrop-blur-sm"
+                    )}
+                  >
+                    {settings.microphoneEnabled ? (
+                      <Mic className="h-4 w-4" />
+                    ) : (
+                      <MicOff className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+              ) : (
+                /* Desktop: Microphone button without arrow */
+                <Button
                   variant={settings.microphoneEnabled ? "default" : "outline"}
                   size="icon"
                   onClick={() => handleSettingsChange({
@@ -611,6 +735,7 @@ export default function VideoRecorder() {
                     <MicOff className="h-4 w-4" />
                   )}
                 </Button>
+              )}
 
               {/* Center - Record button */}
               <div className="flex-1 flex justify-center">
@@ -757,6 +882,7 @@ export default function VideoRecorder() {
                 error={error}
                 startRecordingAfterCountdown={startRecordingAfterCountdown}
                 stopRecording={stopRecording}
+                availableMicrophones={availableMicrophones}
               />
             </div>
           </div>
