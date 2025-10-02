@@ -113,7 +113,7 @@ export default function MediaControls({
                   >
                     <div className="flex flex-col items-start min-w-0">
                       <span className="font-medium truncate w-full">
-                        {getMicrophoneLabel(microphone)}
+                        ffffff{getMicrophoneLabel(microphone)}
                       </span>
                     </div>
                   </DropdownMenuItem>
@@ -136,7 +136,7 @@ export default function MediaControls({
                   className="h-8 w-8 p-0"
                   aria-label="Select microphone"
                 >
-                  <ChevronDown className="h-4 w-4" />
+                  <ChevronUp className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-64" side="bottom">

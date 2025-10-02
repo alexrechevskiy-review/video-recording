@@ -637,24 +637,46 @@ export default function VideoRecorder() {
                 Back
               </Button>
 
-              {/* Mobile: Microphone section with arrow above */}
+              {/* Mobile: Microphone section with arrow on the right */}
               {isMobile ? (
-                <div className="flex flex-col items-center">
-                  {/* Arrow above microphone button */}
+                <div className="flex items-center gap-2">
+                  {/* Microphone toggle button */}
+                  <Button
+                    variant={settings.microphoneEnabled ? "default" : "outline"}
+                    size="icon"
+                    onClick={() => handleSettingsChange({
+                      ...settings,
+                      microphoneEnabled: !settings.microphoneEnabled,
+                    })}
+                    disabled={false}
+                    className={cn(
+                      "h-10 w-10 rounded-full",
+                      settings.microphoneEnabled
+                        ? "bg-white text-black hover:bg-white/90"
+                        : "bg-white/20 border-white/30 text-white hover:bg-white/30 backdrop-blur-sm"
+                    )}
+                  >
+                    {settings.microphoneEnabled ? (
+                      <Mic className="h-4 w-4" />
+                    ) : (
+                      <MicOff className="h-4 w-4" />
+                    )}
+                  </Button>
+
+                  {/* Arrow on the right of microphone button */}
                   {settings.microphoneEnabled && availableMicrophones.length > 1 && (
-                    <div className="relative">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            disabled={false}
-                            className="absolute -top-8 left-1/2 transform -translate-x-1/2 h-8 w-8 p-0 text-white hover:bg-white/20"
-                            aria-label="Select microphone"
-                          >
-                            <ChevronUp size={12} />
-                          </Button>
-                        </DropdownMenuTrigger>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          disabled={false}
+                          className="h-8 w-8 p-0 text-white hover:bg-white/20"
+                          aria-label="Select microphone"
+                        >
+                          <ChevronUp size={12} />
+                        </Button>
+                      </DropdownMenuTrigger>
                       <DropdownMenuContent className="w-64" side="bottom">
                         {availableMicrophones.length === 0 ? (
                           <DropdownMenuItem disabled>
@@ -686,10 +708,11 @@ export default function VideoRecorder() {
                         )}
                       </DropdownMenuContent>
                       </DropdownMenu>
-                    </div>
-                  )}
-                  
-                  {/* Microphone toggle button */}
+                    )}
+                </div>
+              ) : (
+                /* Desktop: Microphone button with arrow on the right */
+                <div className="flex items-center gap-2">
                   <Button
                     variant={settings.microphoneEnabled ? "default" : "outline"}
                     size="icon"
@@ -711,30 +734,54 @@ export default function VideoRecorder() {
                       <MicOff className="h-4 w-4" />
                     )}
                   </Button>
+
+                  {/* Arrow on the right of microphone button */}
+                  {settings.microphoneEnabled && availableMicrophones.length > 1 && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          disabled={false}
+                          className="h-8 w-8 p-0 text-white hover:bg-white/20"
+                          aria-label="Select microphone"
+                        >
+                          <ChevronUp size={12} />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="w-64" side="bottom">
+                        {availableMicrophones.length === 0 ? (
+                          <DropdownMenuItem disabled>
+                            No microphones available
+                          </DropdownMenuItem>
+                        ) : (
+                          availableMicrophones.map((microphone) => (
+                            <DropdownMenuItem
+                              key={microphone.deviceId}
+                              onClick={() => handleSettingsChange({
+                                ...settings,
+                                selectedMicrophoneId: microphone.deviceId,
+                              })}
+                              className={cn(
+                                "cursor-pointer",
+                                settings.selectedMicrophoneId === microphone.deviceId && "bg-accent"
+                              )}
+                            >
+                              <div className="flex flex-col items-start min-w-0">
+                                <span className="font-medium truncate w-full">
+                                  {microphone.label && microphone.label.trim() !== ''
+                                    ? microphone.label.replace(/\s*\([^)]+\)\s*$/, '').trim() || microphone.label
+                                    : `Microphone ${microphone.deviceId.slice(0, 8)}`
+                                  }
+                                </span>
+                              </div>
+                            </DropdownMenuItem>
+                          ))
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
                 </div>
-              ) : (
-                /* Desktop: Microphone button without arrow */
-                <Button
-                  variant={settings.microphoneEnabled ? "default" : "outline"}
-                  size="icon"
-                  onClick={() => handleSettingsChange({
-                    ...settings,
-                    microphoneEnabled: !settings.microphoneEnabled,
-                  })}
-                  disabled={false}
-                  className={cn(
-                    "h-10 w-10 rounded-full",
-                    settings.microphoneEnabled
-                      ? "bg-white text-black hover:bg-white/90"
-                      : "bg-white/20 border-white/30 text-white hover:bg-white/30 backdrop-blur-sm"
-                  )}
-                >
-                  {settings.microphoneEnabled ? (
-                    <Mic className="h-4 w-4" />
-                  ) : (
-                    <MicOff className="h-4 w-4" />
-                  )}
-                </Button>
               )}
 
               {/* Center - Record button */}

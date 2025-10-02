@@ -81,7 +81,7 @@ export default function MicrophoneSelector({
             >
               <div className="flex flex-col items-start min-w-0">
                 <span className="font-medium truncate w-full">
-                  {getMicrophoneLabel(microphone)}
+                  fwefwefwe{getMicrophoneLabel(microphone)}
                 </span>
               </div>
             </DropdownMenuItem>
